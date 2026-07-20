@@ -28,6 +28,7 @@ const {
     />
   </head>
   <body>
+    <a class="skip" href="#main">Skip to content</a>
     <slot />
   </body>
 </html>
@@ -41,7 +42,7 @@ const {
     --line-soft: #1e2f34;
     --ink: #eaf0ee;
     --muted: #8ba09d;
-    --muted-dim: #61756f;
+    --muted-dim: #7a8f89;
     --brass: #e9a94b;
     --brass-dim: #c68a35;
     --cyan: #63d3c7;
@@ -109,6 +110,22 @@ const {
     max-width: var(--maxw);
     margin-inline: auto;
     padding-inline: var(--gutter);
+  }
+
+  /* ---- skip link ---- */
+  .skip {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--brass);
+    color: #14100a;
+    padding: 8px 16px;
+    text-decoration: none;
+    z-index: 50;
+  }
+
+  .skip:focus {
+    top: 0;
   }
 
   /* ---- shared bits ---- */

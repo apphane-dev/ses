@@ -67,7 +67,7 @@ const docs = [
     </div>
   </header>
 
-  <main>
+  <main id="main">
     <!-- ============ HERO ============ -->
     <section class="hero">
       <div class="wrap hero-inner">
@@ -230,7 +230,7 @@ const docs = [
 ├─ <span class="t-file">slide-00-welcome.wav</span>       <span class="t-meta">§ 0:00</span>
 ├─ <span class="t-file">slide-01-how-it-works.wav</span>  <span class="t-meta">§ 0:20</span>
 ├─ <span class="t-file">slide-02-getting…wav</span>       <span class="t-meta">§ 0:45</span>
-│  └─ <span class="t-raw">slide-02-getting….raw.wav</span> <span class="t-meta">raw take kept</span>
+├─ <span class="t-raw">slide-02-getting….raw.wav</span> <span class="t-meta">raw take kept</span>
 └─ <span class="t-full">full.wav</span>                    <span class="t-meta">every section, joined</span></code></pre>
           </figure>
         </div>
@@ -488,8 +488,10 @@ const docs = [
     color: var(--brass) !important;
   }
   @media (max-width: 640px) {
-    .nav-links a:not(.nav-cta) {
-      display: none;
+    .nav-links {
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      gap: 1.2rem;
     }
   }
 
