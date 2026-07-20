@@ -1,0 +1,76 @@
+---
+// Signature element: a live "signal" — vertical bars that breathe like a
+// voiced waveform. Purely decorative; hidden from assistive tech.
+interface Props {
+  bars?: number;
+  className?: string;
+}
+const { bars = 96, className = "" } = Astro.props;
+
+// A fixed pseudo-envelope so the shape reads as speech (peaks + rests),
+// not a random equalizer. Values 0..1.
+const seed = [
+  0.18, 0.32, 0.55, 0.7, 0.9, 0.62, 0.4, 0.28, 0.5, 0.78, 0.95, 0.66, 0.34,
+  0.22, 0.14, 0.3, 0.58, 0.82, 0.72, 0.46, 0.26, 0.12, 0.24, 0.44, 0.68, 0.88,
+  0.6, 0.36, 0.5, 0.74, 0.92, 0.7, 0.42, 0.2, 0.1, 0.28, 0.52, 0.76, 0.64, 0.38,
+];
+const items = Array.from({ length: bars }, (_, i) => {
+  const h = seed[i % seed.length];
+  return { h, delay: (i % 20) * 0.09 };
+});
+---
+
+<div class={`waveform ${className}`} aria-hidden="true">
+  {
+    items.map((b) => (
+      <span
+        class="bar"
+        style={`--h:${(b.h * 100).toFixed(0)}%;--d:${b.delay}s`}
+      />
+    ))
+  }
+</div>
+
+<style>
+  .waveform {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 100%;
+    width: 100%;
+    min-height: 64px;
+  }
+  .bar {
+    flex: 1 1 0;
+    min-width: 2px;
+    height: var(--h);
+    border-radius: 2px;
+    background: linear-gradient(
+      180deg,
+      var(--brass) 0%,
+      var(--brass-dim) 70%,
+      transparent 100%
+    );
+    transform-origin: center;
+    animation: pulse 2.4s ease-in-out infinite;
+    animation-delay: var(--d);
+    opacity: 0.9;
+  }
+  @keyframes pulse {
+    0%,
+    100% {
+      transform: scaleY(0.35);
+      opacity: 0.55;
+    }
+    50% {
+      transform: scaleY(1);
+      opacity: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bar {
+      transform: scaleY(0.8);
+      opacity: 0.85;
+    }
+  }
+</style>

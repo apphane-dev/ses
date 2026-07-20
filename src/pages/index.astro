@@ -1,17 +1,1106 @@
 ---
-// Home page placeholder
+import Layout from "../layouts/Layout.astro";
+import Waveform from "../components/Waveform.astro";
+import Pipeline from "../components/Pipeline.astro";
+
+const REPO = "https://github.com/apphane-dev/ses";
+
+const features = [
+  {
+    tag: "garble gate",
+    title: "Retry the bad takes",
+    body: "A sustained loud-burst detector catches likely garbling per chunk and re-rolls it within a configurable retry budget.",
+  },
+  {
+    tag: "pause gate",
+    title: "Catch dead air",
+    body: "Over-long internal silences trigger a section-level re-render before the take is ever accepted.",
+  },
+  {
+    tag: "raw / enhanced",
+    title: "Enhance without losing the clean take",
+    body: "LavaSR post-processing is optional. If it injects high-frequency hash, the enhanced result is discarded and the raw take is kept.",
+  },
+  {
+    tag: "--slide N",
+    title: "Iterate one section at a time",
+    body: "Revise a single part with --slide N instead of re-rendering the entire script. Indexes are zero-based.",
+  },
+];
+
+const chips = [
+  "Python",
+  "SoX for rendering",
+  "Local model weights",
+  "Apple MPS or CPU",
+  "Command-line workflow",
+];
+
+const docs = [
+  { label: "Quickstart & script format", meta: "README", href: `${REPO}#quickstart` },
+  { label: "Architecture & module map", meta: "docs/DESIGN.md", href: `${REPO}/blob/main/docs/DESIGN.md` },
+  { label: "Contribution & testing policy", meta: "docs/CONTRIBUTING.md", href: `${REPO}/blob/main/docs/CONTRIBUTING.md` },
+  { label: "Complete narration example", meta: "examples/script.md", href: `${REPO}/blob/main/examples/script.md` },
+  { label: "Voice-sample setup", meta: "examples/voices/", href: `${REPO}/blob/main/examples/voices/README.md` },
+];
 ---
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>ses</title>
-  </head>
-  <body>
-    <main>
-      <h1>ses</h1>
-      <p>Placeholder content. This site is under construction.</p>
-    </main>
-  </body>
-</html>
+
+<Layout>
+  <!-- ambient signal line behind the page -->
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="/" aria-label="ses home">
+        <span class="brand-mark" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i>
+        </span>
+        <span class="brand-name">ses</span>
+        <span class="brand-sub mono">/ voice</span>
+      </a>
+      <nav class="nav-links mono">
+        <a href="#workflow">Pipeline</a>
+        <a href="#script">Script</a>
+        <a href="#start">Quickstart</a>
+        <a class="nav-cta" href={REPO} rel="noopener">GitHub ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============ HERO ============ -->
+    <section class="hero">
+      <div class="wrap hero-inner">
+        <p class="eyebrow">Open-source voice-cloning voiceover pipeline</p>
+        <h1 class="hero-title">
+          Turn a voice sample and a Markdown script into
+          <span class="accent">organized narration.</span>
+        </h1>
+        <p class="hero-body">
+          <span class="mono kw">ses</span> renders a cloned voice section by
+          section, automatically retries suspicious takes, optionally enhances
+          the result, and delivers editable WAVs plus one complete render.
+        </p>
+
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#start">View the quickstart</a>
+          <a class="btn btn-ghost" href="#architecture">Explore the architecture</a>
+        </div>
+
+        <ul class="proof mono" aria-label="At a glance">
+          <li>Local Python CLI</li>
+          <li>Qwen3-TTS</li>
+          <li>LavaSR</li>
+          <li>MIT licensed</li>
+        </ul>
+      </div>
+
+      <div class="hero-scope wrap" aria-hidden="true">
+        <div class="scope">
+          <div class="scope-label mono"><span class="dot"></span> voiced signal · in → out</div>
+          <Waveform bars={120} className="hero-wave" />
+          <div class="scope-ticks mono">
+            <span>0:00</span><span>0:20</span><span>0:45</span><span>full.wav</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ INPUT → OUTPUT STRIP ============ -->
+    <section class="section-pad strip-sec">
+      <div class="wrap">
+        <div class="strip">
+          <div class="strip-node">
+            <span class="strip-k mono">input</span>
+            <span class="strip-v">Voice sample + transcript</span>
+            <span class="strip-note">ICL cloning, or audio alone</span>
+          </div>
+          <span class="strip-arrow mono" aria-hidden="true">→</span>
+          <div class="strip-node">
+            <span class="strip-k mono">input</span>
+            <span class="strip-v">Markdown script</span>
+            <span class="strip-note">Timestamped sections</span>
+          </div>
+          <span class="strip-arrow mono" aria-hidden="true">→</span>
+          <div class="strip-node">
+            <span class="strip-k mono">process</span>
+            <span class="strip-v">Quality-gated pipeline</span>
+            <span class="strip-note">Your pacing &amp; thresholds</span>
+          </div>
+          <span class="strip-arrow mono" aria-hidden="true">→</span>
+          <div class="strip-node out">
+            <span class="strip-k mono">output</span>
+            <span class="strip-v">Section WAVs + full.wav</span>
+            <span class="strip-note">Every section is editable</span>
+          </div>
+        </div>
+        <p class="strip-caption">
+          Bring any voice sample and any script. Pair the sample with a
+          transcript for ICL cloning, tune the pacing to your project, and keep
+          every section as a separate deliverable.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ FEATURES ============ -->
+    <section class="section-pad" id="features">
+      <div class="wrap">
+        <div class="head-block">
+          <p class="eyebrow">Built for narration work</p>
+          <h2 class="h2">Not just a text-to-speech demo.</h2>
+        </div>
+        <div class="feature-grid">
+          {
+            features.map((f) => (
+              <article class="card">
+                <span class="card-tag mono">{f.tag}</span>
+                <h3 class="card-title">{f.title}</h3>
+                <p class="card-body">{f.body}</p>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ WORKFLOW ============ -->
+    <section class="section-pad workflow-sec" id="workflow">
+      <div class="wrap">
+        <div class="head-block">
+          <p class="eyebrow">The signal path</p>
+          <h2 class="h2">From Markdown to final voiceover.</h2>
+          <p class="head-sub">
+            The orchestration is one line in
+            <span class="mono kw">ses/pipeline.py</span> —
+            <span class="mono">parse → chunk → synth → gate → enhance → level → concat.</span>
+            Two stations can send the signal backwards.
+          </p>
+        </div>
+        <Pipeline />
+        <div class="loop-legend mono">
+          <span><i class="lg lg-signal"></i> forward signal</span>
+          <span><i class="lg lg-loop"></i> retry loop</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SCRIPT SHOWCASE ============ -->
+    <section class="section-pad" id="script">
+      <div class="wrap">
+        <div class="head-block">
+          <p class="eyebrow">Authoring</p>
+          <h2 class="h2">Write narration in plain Markdown.</h2>
+          <p class="head-sub">
+            Timestamped headings become named audio files. Blockquotes become
+            narration. Blank quoted lines create longer paragraph pauses. Leave
+            <span class="mono">TODO</span>, <span class="mono">REDO</span>, or
+            <span class="mono">WIP</span> markers in place — <span class="mono kw">ses</span> skips them.
+          </p>
+        </div>
+
+        <div class="script-grid">
+          <figure class="code-pane">
+            <figcaption class="pane-bar mono">
+              <span class="pane-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span>script.md</span>
+            </figcaption>
+            <pre class="code"><code><span class="c-h">## 0:00 — Welcome</span>
+
+<span class="c-q">&gt; Welcome to ses, a voiceover pipeline. This tool turns a</span>
+<span class="c-q">&gt; written script into narrated audio using a short sample</span>
+<span class="c-q">&gt; of your own voice.</span>
+<span class="c-q">&gt;</span>
+<span class="c-q">&gt; You write in plain markdown, drop in a voice sample, and</span>
+<span class="c-q">&gt; get back one WAV per section plus a single render.</span>
+
+<span class="c-h">## 0:20 — How it works</span>
+
+<span class="c-q">&gt; Each section is split into sentences and synthesized one</span>
+<span class="c-q">&gt; sentence at a time, which keeps the prosody stable.</span>
+<span class="c-q">&gt;</span>
+<span class="c-mark">&gt; TODO</span> <span class="c-c">tighten the pacing note here</span></code></pre>
+          </figure>
+
+          <figure class="code-pane">
+            <figcaption class="pane-bar mono">
+              <span class="pane-tree" aria-hidden="true">▚</span>
+              <span>audio/20260720-143000/</span>
+            </figcaption>
+            <pre class="code tree"><code><span class="t-dir">audio/20260720-143000/</span>
+├─ <span class="t-file">slide-00-welcome.wav</span>       <span class="t-meta">§ 0:00</span>
+├─ <span class="t-file">slide-01-how-it-works.wav</span>  <span class="t-meta">§ 0:20</span>
+├─ <span class="t-file">slide-02-getting…wav</span>       <span class="t-meta">§ 0:45</span>
+│  └─ <span class="t-raw">slide-02-getting….raw.wav</span> <span class="t-meta">raw take kept</span>
+└─ <span class="t-full">full.wav</span>                    <span class="t-meta">every section, joined</span></code></pre>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ QUICKSTART ============ -->
+    <section class="section-pad start-sec" id="start">
+      <div class="wrap start-grid">
+        <div class="start-copy">
+          <p class="eyebrow">Your first render</p>
+          <h2 class="h2">Three commands to a full run.</h2>
+          <p class="head-sub">
+            Put <span class="mono">my_voice.wav</span> in <span class="mono">in/</span>.
+            Add <span class="mono">my_voice.txt</span> with the clip transcript to
+            enable ICL cloning. Model weights download on the first render; later
+            runs can work offline.
+          </p>
+
+          <div class="cmd-list">
+            <p class="cmd-lead mono">Useful controls</p>
+            <div class="cmd"><code class="mono">--dry-run</code><span>Parse and print — no models, no audio.</span></div>
+            <div class="cmd"><code class="mono">--slide 2</code><span>Render a single section (zero-based).</span></div>
+            <div class="cmd"><code class="mono">--no-enhance</code><span>Render without LavaSR enhancement.</span></div>
+            <div class="cmd"><code class="mono">--samples-dir</code><span>Point at any folder of voice samples.</span></div>
+          </div>
+        </div>
+
+        <figure class="code-pane term">
+          <figcaption class="pane-bar mono">
+            <span class="pane-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span>zsh — first render</span>
+          </figcaption>
+          <pre class="code"><code><span class="c-c"># 1 · install dependencies</span>
+<span class="c-p">$</span> pip install -r requirements.txt
+<span class="c-c"># qwen-tts shells out to the SoX executable</span>
+<span class="c-p">$</span> brew install sox
+
+<span class="c-c"># 2 · drop in/my_voice.wav (+ optional in/my_voice.txt)</span>
+<span class="c-c">#     then render your script</span>
+<span class="c-p">$</span> python -m ses <span class="c-flag">--script</span> script.md <span class="c-flag">--sample</span> my_voice
+
+<span class="c-c"># iterate on just section 2, no enhancement</span>
+<span class="c-p">$</span> python -m ses <span class="c-flag">--script</span> script.md <span class="c-flag">--sample</span> my_voice \
+    <span class="c-flag">--slide</span> 2 <span class="c-flag">--no-enhance</span></code></pre>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ============ ARCHITECTURE + COPY-OUT ============ -->
+    <section class="section-pad arch-sec" id="architecture">
+      <div class="wrap arch-grid">
+        <div class="arch-copy">
+          <p class="eyebrow">For developers</p>
+          <h2 class="h2">Small modules. Explicit seams. No plugin magic.</h2>
+          <p class="head-sub">
+            Parsing, chunking, DSP, and quality gates stay importable with numpy
+            alone. Heavy model libraries are isolated inside adapters. Use the
+            whole pipeline, pass your own engine to
+            <span class="mono kw">run_pipeline</span>, or copy only the modules
+            your project needs.
+          </p>
+          <ul class="arch-list">
+            <li>Frozen <span class="mono">PipelineConfig</span> — every tunable in one place.</li>
+            <li>Tiny <span class="mono">Protocol</span>s for parsers, TTS engines, and enhancers.</li>
+            <li>No global state, no engine auto-discovery.</li>
+            <li>Pure-numpy tests with synthetic tones, bursts, and silence.</li>
+          </ul>
+        </div>
+
+        <div class="copyout">
+          <p class="copyout-title">Take the pipeline — or just the useful parts.</p>
+          <p class="copyout-body">
+            Need only trim, fade, normalize, garble detection, or pause
+            detection? The pure audio modules copy into another project without
+            torch, Qwen3-TTS, LavaSR, or the orchestration layer.
+          </p>
+          <figure class="code-pane term small">
+            <figcaption class="pane-bar mono">
+              <span class="pane-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span>copy-out</span>
+            </figcaption>
+            <pre class="code"><code><span class="c-p">$</span> mkdir -p yourproject/audio
+<span class="c-p">$</span> cp ses/audio/__init__.py \
+     ses/audio/dsp.py ses/audio/quality.py \
+     yourproject/audio/
+<span class="c-p">$</span> pip install numpy</code></pre>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ HONEST FIT ============ -->
+    <section class="section-pad fit-sec">
+      <div class="wrap">
+        <div class="fit-inner">
+          <div class="fit-head">
+            <p class="eyebrow">The honest part</p>
+            <h2 class="h2">A local developer tool with a deliberate engine stack.</h2>
+          </div>
+          <p class="fit-body">
+            <span class="mono kw">ses</span> runs Qwen3-TTS locally on Apple MPS
+            or CPU and uses LavaSR for optional enhancement. The quality gates
+            are tuned to this stack — you can replace an adapter, but a different
+            engine will usually need different gate thresholds. It is an
+            early-stage, developer-oriented reference pipeline, not a hosted
+            product.
+          </p>
+          <ul class="chips mono" aria-label="Requirements">
+            {chips.map((c) => <li>{c}</li>)}
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DOCS ============ -->
+    <section class="section-pad" id="docs">
+      <div class="wrap">
+        <div class="head-block">
+          <p class="eyebrow">Read the source</p>
+          <h2 class="h2">Everything is documented in the repo.</h2>
+        </div>
+        <ul class="doc-list">
+          {
+            docs.map((d, i) => (
+              <li>
+                <a class="doc-row" href={d.href} rel="noopener">
+                  <span class="doc-idx mono">{String(i + 1).padStart(2, "0")}</span>
+                  <span class="doc-label">{d.label}</span>
+                  <span class="doc-meta mono">{d.meta}</span>
+                  <span class="doc-arrow mono" aria-hidden="true">↗</span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ FINAL CTA ============ -->
+    <section class="section-pad cta-sec">
+      <div class="wrap cta-inner">
+        <Waveform bars={72} className="cta-wave" />
+        <h2 class="cta-title">Give your script a voice —<br />one section at a time.</h2>
+        <p class="cta-body">
+          Start with a reference clip, write the narration in Markdown, and let
+          <span class="mono kw"> ses</span> render, check, enhance, and assemble the take.
+        </p>
+        <div class="hero-cta center">
+          <a class="btn btn-primary" href={`${REPO}#quickstart`} rel="noopener">Read the quickstart</a>
+          <a class="btn btn-ghost" href={REPO} rel="noopener">View on GitHub ↗</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-inner">
+      <div class="foot-brand">
+        <span class="brand-name">ses</span>
+        <span class="brand-sub mono">/ voice · Turkish</span>
+      </div>
+      <p class="foot-note mono">Open source under the MIT License.</p>
+      <a class="foot-link mono" href={REPO} rel="noopener">github.com/apphane-dev/ses ↗</a>
+    </div>
+  </footer>
+</Layout>
+
+<style>
+  /* ---------- ambient ---------- */
+  .grain {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      radial-gradient(1100px 620px at 78% -8%, rgba(233, 169, 75, 0.1), transparent 60%),
+      radial-gradient(900px 560px at 6% 8%, rgba(99, 211, 199, 0.06), transparent 55%);
+  }
+  main,
+  .nav,
+  .foot {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ---------- nav ---------- */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    backdrop-filter: blur(10px);
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.55rem;
+    text-decoration: none;
+  }
+  .brand-mark {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 16px;
+    align-self: center;
+  }
+  .brand-mark i {
+    width: 3px;
+    border-radius: 2px;
+    background: var(--brass);
+    animation: navpulse 1.8s ease-in-out infinite;
+  }
+  .brand-mark i:nth-child(1) { height: 40%; animation-delay: 0s; }
+  .brand-mark i:nth-child(2) { height: 80%; animation-delay: 0.15s; }
+  .brand-mark i:nth-child(3) { height: 55%; animation-delay: 0.3s; }
+  .brand-mark i:nth-child(4) { height: 100%; animation-delay: 0.45s; }
+  .brand-mark i:nth-child(5) { height: 45%; animation-delay: 0.6s; }
+  @keyframes navpulse {
+    0%, 100% { transform: scaleY(0.5); opacity: 0.6; }
+    50% { transform: scaleY(1); opacity: 1; }
+  }
+  .brand-name {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.3rem;
+    letter-spacing: -0.03em;
+  }
+  .brand-sub {
+    font-size: 0.72rem;
+    color: var(--muted-dim);
+  }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 1.6rem;
+    font-size: 0.82rem;
+  }
+  .nav-links a {
+    text-decoration: none;
+    color: var(--muted);
+    transition: color 0.18s ease;
+  }
+  .nav-links a:hover {
+    color: var(--ink);
+  }
+  .nav-cta {
+    color: var(--brass) !important;
+  }
+  @media (max-width: 640px) {
+    .nav-links a:not(.nav-cta) {
+      display: none;
+    }
+  }
+
+  /* ---------- hero ---------- */
+  .hero {
+    padding-top: clamp(3.5rem, 7vw, 6rem);
+    padding-bottom: clamp(2rem, 4vw, 3rem);
+  }
+  .hero-inner {
+    max-width: 900px;
+  }
+  .hero-title {
+    font-size: clamp(2.5rem, 6.4vw, 4.6rem);
+    font-weight: 700;
+    margin-top: 1.4rem;
+    max-width: 15ch;
+  }
+  .hero-title .accent {
+    color: var(--brass);
+  }
+  .hero-body {
+    margin-top: 1.5rem;
+    max-width: 56ch;
+    font-size: clamp(1.05rem, 2vw, 1.2rem);
+    color: var(--muted);
+  }
+  .kw {
+    color: var(--ink);
+    background: var(--surface-2);
+    padding: 0.06em 0.4em;
+    border-radius: 5px;
+    font-size: 0.92em;
+  }
+  .hero-cta {
+    margin-top: 2.2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+  }
+  .hero-cta.center {
+    justify-content: center;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 0.86rem;
+    letter-spacing: 0.01em;
+    padding: 0.85rem 1.5rem;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: transform 0.15s ease, background 0.18s ease, border-color 0.18s ease;
+  }
+  .btn-primary {
+    background: var(--brass);
+    color: #140f06;
+    font-weight: 600;
+    border: 1px solid var(--brass);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    background: #f2ba63;
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+  .btn-ghost:hover {
+    border-color: var(--brass);
+    color: var(--brass);
+    transform: translateY(-2px);
+  }
+  .proof {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.4rem;
+    padding: 0;
+    margin: 2.4rem 0 0;
+    font-size: 0.76rem;
+    color: var(--muted-dim);
+    letter-spacing: 0.05em;
+  }
+  .proof li {
+    display: flex;
+    align-items: center;
+    gap: 1.4rem;
+  }
+  .proof li:not(:last-child)::after {
+    content: "·";
+    color: var(--brass);
+  }
+
+  /* hero scope */
+  .hero-scope {
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+  }
+  .scope {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background:
+      linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+    padding: 1.1rem 1.3rem 1.2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .scope::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--line-soft) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+    background-size: 34px 34px;
+    opacity: 0.25;
+    pointer-events: none;
+  }
+  .scope-label {
+    position: relative;
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.7rem;
+  }
+  .scope-label .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 10px var(--cyan);
+  }
+  .hero-wave {
+    position: relative;
+    height: clamp(90px, 16vw, 150px);
+  }
+  .scope-ticks {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.6rem;
+    font-size: 0.68rem;
+    color: var(--muted-dim);
+    border-top: 1px solid var(--line-soft);
+    padding-top: 0.55rem;
+  }
+
+  /* ---------- headings ---------- */
+  .head-block {
+    max-width: 62ch;
+    margin-bottom: 2.6rem;
+  }
+  .h2 {
+    font-size: clamp(1.8rem, 3.8vw, 2.7rem);
+    margin-top: 0.9rem;
+  }
+  .head-sub {
+    margin-top: 1.1rem;
+    color: var(--muted);
+    font-size: 1.02rem;
+  }
+
+  /* ---------- input/output strip ---------- */
+  .strip-sec {
+    border-top: 1px solid var(--line-soft);
+    border-bottom: 1px solid var(--line-soft);
+    background: color-mix(in srgb, var(--surface) 40%, transparent);
+  }
+  .strip {
+    display: flex;
+    align-items: stretch;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .strip-node {
+    flex: 1 1 190px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 1.1rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .strip-node.out {
+    border-color: color-mix(in srgb, var(--brass) 45%, var(--line));
+    background: color-mix(in srgb, var(--brass) 7%, var(--surface));
+  }
+  .strip-k {
+    font-size: 0.64rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--cyan);
+  }
+  .strip-node.out .strip-k {
+    color: var(--brass);
+  }
+  .strip-v {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+  .strip-note {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .strip-arrow {
+    display: flex;
+    align-items: center;
+    color: var(--muted-dim);
+    font-size: 1.1rem;
+  }
+  @media (max-width: 720px) {
+    .strip-arrow {
+      transform: rotate(90deg);
+      justify-content: center;
+      width: 100%;
+    }
+    .strip-node {
+      flex-basis: 100%;
+    }
+  }
+  .strip-caption {
+    margin-top: 1.6rem;
+    max-width: 62ch;
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+
+  /* ---------- features ---------- */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1px;
+    background: var(--line-soft);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .card {
+    background: var(--surface);
+    padding: 1.7rem 1.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    transition: background 0.2s ease;
+  }
+  .card:hover {
+    background: var(--surface-2);
+  }
+  .card-tag {
+    align-self: flex-start;
+    font-size: 0.66rem;
+    letter-spacing: 0.05em;
+    color: var(--brass);
+    border: 1px solid color-mix(in srgb, var(--brass) 35%, transparent);
+    border-radius: 999px;
+    padding: 0.18rem 0.6rem;
+  }
+  .card-title {
+    font-size: 1.28rem;
+    margin-top: 0.3rem;
+  }
+  .card-body {
+    color: var(--muted);
+    font-size: 0.94rem;
+  }
+
+  /* ---------- workflow ---------- */
+  .workflow-sec {
+    background: color-mix(in srgb, var(--surface) 35%, transparent);
+    border-top: 1px solid var(--line-soft);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .loop-legend {
+    display: flex;
+    gap: 1.6rem;
+    margin-top: 1.2rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+  .loop-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .lg {
+    width: 22px;
+    height: 3px;
+    border-radius: 2px;
+    display: inline-block;
+  }
+  .lg-signal {
+    background: var(--cyan);
+    opacity: 0.6;
+  }
+  .lg-loop {
+    background: repeating-linear-gradient(90deg, var(--coral) 0 4px, transparent 4px 7px);
+  }
+
+  /* ---------- code panes ---------- */
+  .code-pane {
+    margin: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: #0c1417;
+  }
+  .pane-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+  .pane-dots {
+    display: inline-flex;
+    gap: 5px;
+  }
+  .pane-dots i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--line);
+  }
+  .pane-dots i:first-child { background: #3a4a3f; }
+  .pane-tree { color: var(--brass); }
+  .code {
+    margin: 0;
+    padding: 1.15rem 1.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    line-height: 1.7;
+    overflow-x: auto;
+    color: #cdd8d5;
+  }
+  .code code {
+    font-family: inherit;
+  }
+  /* markdown script tokens */
+  .c-h { color: var(--brass); font-weight: 600; }
+  .c-q { color: #b9c6c3; }
+  .c-mark { color: var(--coral); }
+  .c-c { color: var(--muted-dim); font-style: italic; }
+  /* terminal tokens */
+  .c-p { color: var(--cyan); }
+  .c-flag { color: var(--brass); }
+  /* tree tokens */
+  .tree { color: #7d8f8b; }
+  .t-dir { color: var(--cyan); }
+  .t-file { color: #cdd8d5; }
+  .t-raw { color: var(--muted-dim); }
+  .t-full { color: var(--brass); font-weight: 600; }
+  .t-meta { color: var(--muted-dim); }
+
+  .script-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem;
+    align-items: start;
+  }
+  @media (max-width: 860px) {
+    .script-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ---------- quickstart ---------- */
+  .start-sec {
+    border-top: 1px solid var(--line-soft);
+    background: color-mix(in srgb, var(--surface) 35%, transparent);
+  }
+  .start-grid,
+  .arch-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: clamp(2rem, 5vw, 4rem);
+    align-items: center;
+  }
+  @media (max-width: 860px) {
+    .start-grid,
+    .arch-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .cmd-list {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+  .cmd-lead {
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted-dim);
+    margin-bottom: 0.3rem;
+  }
+  .cmd {
+    display: flex;
+    gap: 0.9rem;
+    align-items: baseline;
+    padding-bottom: 0.55rem;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .cmd code {
+    color: var(--brass);
+    font-size: 0.82rem;
+    flex: 0 0 auto;
+    min-width: 8.5rem;
+  }
+  .cmd span {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  /* ---------- architecture ---------- */
+  .arch-sec {
+    border-top: 1px solid var(--line-soft);
+  }
+  .arch-list {
+    margin: 1.8rem 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .arch-list li {
+    position: relative;
+    padding-left: 1.6rem;
+    color: var(--muted);
+    font-size: 0.96rem;
+  }
+  .arch-list li::before {
+    content: "▸";
+    position: absolute;
+    left: 0;
+    color: var(--brass);
+  }
+  .copyout {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1.7rem;
+  }
+  .copyout-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.35rem;
+    letter-spacing: -0.01em;
+  }
+  .copyout-body {
+    margin-top: 0.8rem;
+    color: var(--muted);
+    font-size: 0.94rem;
+  }
+  .copyout .code-pane {
+    margin-top: 1.4rem;
+  }
+  .term.small .code {
+    font-size: 0.76rem;
+  }
+
+  /* ---------- fit ---------- */
+  .fit-sec {
+    border-top: 1px solid var(--line-soft);
+    border-bottom: 1px solid var(--line-soft);
+    background: color-mix(in srgb, var(--surface) 45%, transparent);
+  }
+  .fit-inner {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .fit-head {
+    max-width: 60ch;
+  }
+  .fit-body {
+    max-width: 66ch;
+    color: var(--muted);
+    font-size: 1.02rem;
+  }
+  .chips {
+    list-style: none;
+    padding: 0;
+    margin: 0.6rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .chips li {
+    font-size: 0.76rem;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.4rem 0.9rem;
+  }
+
+  /* ---------- docs ---------- */
+  .doc-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
+  }
+  .doc-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: 1.2rem;
+    padding: 1.15rem 0.4rem;
+    border-bottom: 1px solid var(--line);
+    text-decoration: none;
+    transition: padding 0.18s ease, background 0.18s ease;
+  }
+  .doc-row:hover {
+    padding-left: 1.1rem;
+    background: color-mix(in srgb, var(--brass) 6%, transparent);
+  }
+  .doc-idx {
+    font-size: 0.74rem;
+    color: var(--brass);
+  }
+  .doc-label {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+  .doc-meta {
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  .doc-arrow {
+    color: var(--muted-dim);
+  }
+  .doc-row:hover .doc-arrow {
+    color: var(--brass);
+  }
+  @media (max-width: 560px) {
+    .doc-meta {
+      display: none;
+    }
+  }
+
+  /* ---------- final cta ---------- */
+  .cta-sec {
+    text-align: center;
+    border-top: 1px solid var(--line-soft);
+    background:
+      radial-gradient(700px 340px at 50% 120%, rgba(233, 169, 75, 0.14), transparent 65%);
+  }
+  .cta-inner {
+    max-width: 720px;
+  }
+  .cta-wave {
+    height: 60px;
+    max-width: 420px;
+    margin: 0 auto 2rem;
+    opacity: 0.85;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
+  }
+  .cta-title {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+  }
+  .cta-body {
+    margin: 1.3rem auto 0;
+    max-width: 52ch;
+    color: var(--muted);
+    font-size: 1.08rem;
+  }
+  .cta-sec .hero-cta {
+    margin-top: 2.2rem;
+  }
+
+  /* ---------- footer ---------- */
+  .foot {
+    border-top: 1px solid var(--line);
+    padding-block: 2.4rem;
+  }
+  .foot-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .foot-brand {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+  .foot-note {
+    font-size: 0.78rem;
+    color: var(--muted-dim);
+  }
+  .foot-link {
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-decoration: none;
+  }
+  .foot-link:hover {
+    color: var(--brass);
+  }
+</style>

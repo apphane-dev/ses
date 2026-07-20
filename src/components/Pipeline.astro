@@ -1,0 +1,121 @@
+---
+// The signal path: the real orchestration from ses/pipeline.py —
+// parse → chunk → synth → gate → enhance → level → concat.
+// Stations that can send signal backwards carry a loop badge.
+const stations = [
+  { key: "parse", label: "Parse", note: "Timestamped sections from Markdown" },
+  { key: "chunk", label: "Chunk", note: "Sentences sized for stable prosody" },
+  { key: "synth", label: "Synth", note: "Qwen3-TTS clones each chunk" },
+  {
+    key: "gate",
+    label: "Gate",
+    note: "Garble re-roll · dead-pause re-render",
+    loop: "re-roll / re-render",
+  },
+  {
+    key: "enhance",
+    label: "Enhance",
+    note: "LavaSR, or keep the raw take",
+    loop: "reject added hash",
+  },
+  { key: "level", label: "Level", note: "Loudness leveling across sections" },
+  { key: "concat", label: "Concat", note: "Section WAVs + full.wav" },
+];
+---
+
+<ol class="signal" aria-label="Pipeline stages">
+  {
+    stations.map((s, i) => (
+      <li class={`station ${s.loop ? "has-loop" : ""}`}>
+        <div class="station-head">
+          <span class="idx mono">{String(i + 1).padStart(2, "0")}</span>
+          {s.loop && <span class="loop mono">↺ {s.loop}</span>}
+        </div>
+        <span class="station-label">{s.label}</span>
+        <span class="station-note">{s.note}</span>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .signal {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px;
+    background: var(--line-soft);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .station {
+    position: relative;
+    background: var(--surface);
+    padding: 1.15rem 1.15rem 1.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    transition: background 0.2s ease;
+  }
+  .station:hover {
+    background: var(--surface-2);
+  }
+  /* connective baseline — the signal running through every station */
+  .station::after {
+    content: "";
+    position: absolute;
+    left: 1.15rem;
+    right: 1.15rem;
+    bottom: 0.7rem;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      var(--cyan) 0%,
+      var(--cyan) 100%
+    );
+    opacity: 0.35;
+  }
+  .station.has-loop::after {
+    background: repeating-linear-gradient(
+      90deg,
+      var(--coral) 0 6px,
+      transparent 6px 11px
+    );
+    opacity: 0.7;
+  }
+  .station-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    min-height: 1.2rem;
+  }
+  .idx {
+    font-size: 0.72rem;
+    color: var(--brass);
+    letter-spacing: 0.1em;
+  }
+  .loop {
+    font-size: 0.6rem;
+    letter-spacing: 0.04em;
+    color: var(--coral);
+    border: 1px solid color-mix(in srgb, var(--coral) 40%, transparent);
+    border-radius: 999px;
+    padding: 0.12rem 0.5rem;
+    white-space: nowrap;
+  }
+  .station-label {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: -0.01em;
+  }
+  .station-note {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+</style>
