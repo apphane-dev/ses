@@ -43,16 +43,38 @@ const stations = [
     list-style: none;
     margin: 0;
     padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    /* Seven stations is a prime count, so any wrapped grid leaves an orphan
+       or an empty cell. Instead the signal path is a single unbroken row:
+       stations grow to fill the width when there's room, and the whole path
+       scrolls horizontally once it can't fit — the connective baseline stays
+       continuous and no station is ever stranded on its own line. */
+    display: flex;
+    flex-wrap: nowrap;
     gap: 1px;
     background: var(--line-soft);
     border: 1px solid var(--line);
     border-radius: var(--radius);
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--cyan) 45%, transparent)
+      transparent;
+    overscroll-behavior-x: contain;
+  }
+  .signal::-webkit-scrollbar {
+    height: 6px;
+  }
+  .signal::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--cyan) 45%, transparent);
+    border-radius: 999px;
   }
   .station {
     position: relative;
+    /* Never shrink below a readable width; grow to share any spare space so
+       wide viewports render a flush, equal-width row (as a grid would). */
+    flex: 1 0 150px;
+    scroll-snap-align: start;
     background: var(--surface);
     padding: 1.15rem 1.15rem 1.3rem;
     display: flex;
