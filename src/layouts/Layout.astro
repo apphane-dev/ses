@@ -52,7 +52,8 @@ const {
     --font-body: "IBM Plex Sans", system-ui, sans-serif;
     --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
-    --maxw: 1140px;
+    --maxw: 1240px;
+    --maxw-wide: 1380px;
     --gutter: clamp(1.25rem, 5vw, 3rem);
     --radius: 14px;
   }
@@ -110,6 +111,11 @@ const {
     max-width: var(--maxw);
     margin-inline: auto;
     padding-inline: var(--gutter);
+  }
+
+  /* wider container for code/two-column showcase sections */
+  .wrap.wide {
+    max-width: var(--maxw-wide);
   }
 
   /* ---- skip link ---- */
