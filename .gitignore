@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+/in/
+/audio/
+/.venv/
+.DS_Store
+.pytest_cache/

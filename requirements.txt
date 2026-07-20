@@ -1,0 +1,9 @@
+qwen-tts
+soundfile
+numpy
+torch
+# Without a floor, resolvers can pick a 2021-era numba (via qwen-tts → librosa)
+# whose llvmlite cannot build on modern Python.
+numba>=0.59
+llvmlite>=0.42
+lavasr @ git+https://github.com/ysharma3501/LavaSR.git

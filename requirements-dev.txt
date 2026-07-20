@@ -1,0 +1,4 @@
+# Development / testing dependencies.
+# The test suite runs on pure numpy + soundfile; it never imports torch,
+# qwen_tts, or LavaSR.
+pytest
