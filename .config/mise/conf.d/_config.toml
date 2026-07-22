@@ -1,0 +1,58 @@
+min_version = "2026.4.18"
+
+[tools]
+python = "3.12"
+
+[task_config]
+dir = "{{ config_root }}"
+
+[env]
+_.python.venv = { path = ".venv", create = true }
+
+[tasks.prepare]
+description = "Create the project virtualenv and install runtime and development requirements"
+run = "python -m venv .venv && python -m pip install -r requirements.txt -r requirements-dev.txt"
+
+[tasks.test]
+description = "Run the pytest suite"
+run = "pytest"
+
+[tasks.check]
+description = "Run configured repository quality checks, or report that none are supported"
+run = """
+if [ -f ruff.toml ] || [ -f .ruff.toml ] || [ -f pyproject.toml ] && grep -q '\\[tool\\.ruff' pyproject.toml; then
+  ruff check .
+elif [ -f setup.cfg ] && grep -q '\\[flake8\\]' setup.cfg; then
+  flake8 .
+elif [ -f mypy.ini ] || [ -f .mypy.ini ] || [ -f pyproject.toml ] && grep -q '\\[tool\\.mypy' pyproject.toml; then
+  mypy .
+else
+  echo "not-supported: no repository-configured Python quality tool (ruff, flake8, or mypy)"
+  exit 1
+fi
+"""
+
+[tasks.fix]
+description = "Apply configured repository formatter fixes, or report that none are supported"
+run = """
+if [ -f ruff.toml ] || [ -f .ruff.toml ] || [ -f pyproject.toml ] && grep -q '\\[tool\\.ruff' pyproject.toml; then
+  ruff check --fix .
+  ruff format .
+else
+  echo "not-supported: no repository-configured Python formatter with autofixes (ruff)"
+  exit 1
+fi
+"""
+
+[tasks.ci]
+description = "Run repository checks and tests"
+depends = ["check", "test"]
+
+[tasks.clean]
+description = "Remove Python and pytest caches"
+run = "find . -type d \\( -name __pycache__ -o -name .pytest_cache \\) -prune -exec rm -rf {} +"
+
+[tasks."clean:deps"]
+description = "Remove the project virtualenv and Python caches"
+depends = ["clean"]
+run = "rm -rf .venv"
