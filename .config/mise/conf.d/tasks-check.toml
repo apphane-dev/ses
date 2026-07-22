@@ -1,0 +1,7 @@
+[tasks.check]
+description = "Astro diagnostics (not supported; astro check is not configured)"
+run = "echo 'Astro check is not supported: astro check is not configured for this project.'"
+
+[tasks.ci]
+description = "Run CI checks and build"
+depends = ["prepare", "check", "build"]
