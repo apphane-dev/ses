@@ -166,6 +166,41 @@ rather discover samples from a directory than build `VoiceSample` by hand, use
 Keep heavy imports (`torch`, model libraries) inside the adapter's methods so the
 DSP, parsing, chunking, and quality modules stay importable with numpy alone.
 
+### audio8-TTS (ONNX INT8, CPU) — second engine
+
+Besides the reference Qwen3 adapter, [`ses/tts/audio8.py`](ses/tts/audio8.py)
+ships an `Audio8TTSEngine` running
+[`Audio8/audio8-TTS-0.1B-ONNX-INT8`](https://huggingface.co/Audio8/audio8-TTS-0.1B-ONNX-INT8)
+entirely on CPU with plain `onnxruntime` — no torch, 44.1 kHz mono FP32
+output, Apache-2.0 weights. It reproduces the vendor RAS top-p sampling and
+always speaks with the model's packaged reference voice (it does **not**
+clone the `VoiceSample`), needs ~437 MB of weights on first use (HF-cached,
+`SES_AUDIO8_MODEL_DIR` to point at a local checkout instead), and splits long
+input into pieces that fit the model's 2048-token window.
+
+```python
+from pathlib import Path
+
+from ses import PipelineConfig, VoiceSample, run_pipeline
+from ses.tts.audio8 import Audio8TTSEngine  # onnxruntime/tokenizers load inside
+
+engine = Audio8TTSEngine(
+    VoiceSample(name="ignored", audio=Path("in/my_voice.wav"), transcript=None),
+    PipelineConfig(),
+)
+run_pipeline(
+    script_text=Path("script.md").read_text(),
+    sample=engine.sample,
+    out_dir=Path("audio/manual-run"),
+    config=PipelineConfig(),
+    engine=engine,
+)
+```
+
+Adapter deps: `onnxruntime`, `tokenizers`, `huggingface_hub` (fetch only —
+all optional; the pure test suite and `ses` import skip them). One end-to-end
+synthesis test runs when `SES_AUDIO8_E2E=1` is set.
+
 ## Script format
 
 Sections are introduced by a heading of the form `## <timestamp> — <Title>`. The
