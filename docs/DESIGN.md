@@ -53,6 +53,7 @@ ses/
   tts/
     base.py          # TTSEngine Protocol (synthesize(text, sample) -> audio)
     qwen3.py         # Qwen3-TTS voice-clone adapter (reference impl)
+    audio8.py        # audio8-TTS-0.1B ONNX INT8 CPU adapter (onnxruntime; fixed voice)
   enhance/
     base.py          # Enhancer Protocol (enhance(audio, sr) -> audio, sr)
     lavasr.py        # LavaSR adapter with added-noise fallback (reference impl)
@@ -78,7 +79,10 @@ class Enhancer(Protocol):   # enhance/base.py
 
 Heavy imports (`torch`, `qwen_tts`, `LavaSR`) live **only** inside the adapter
 modules and only at instantiation time — the DSP, parsing, chunking, and
-quality modules are importable and testable with numpy alone.
+quality modules are importable and testable with numpy alone. The audio8
+adapter defers `onnxruntime`, `tokenizers`, and `huggingface_hub` the same
+way; unlike the others these are light (no torch spin-up), so it works as a
+second, CPU-only engine.
 
 ### Config
 
