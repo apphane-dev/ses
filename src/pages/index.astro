@@ -847,6 +847,11 @@ const taglineWords =
   [data-tagline].play [data-word] {
     color: var(--ink);
   }
+  @media (prefers-reduced-motion: reduce) {
+    [data-word] {
+      transition-delay: 0s;
+    }
+  }
 
   /* ---------- features ---------- */
   .feature-grid {

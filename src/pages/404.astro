@@ -3,8 +3,8 @@ import Layout from "../layouts/Layout.astro";
 import Waveform from "../components/Waveform.astro";
 ---
 <Layout title="404 · page not found" description="This page does not exist on ses.apphane.dev.">
-  <main class="wrap nf">
-    <Waveform bars={48} className="nf-wave" />
+  <main id="main" class="wrap nf">
+    <div class="nf-wave"><Waveform bars={48} /></div>
     <p class="nf-code mono">404</p>
     <h1 class="nf-title">This section never rendered.</h1>
     <p class="nf-body">
@@ -27,8 +27,8 @@ import Waveform from "../components/Waveform.astro";
     padding-block: 96px;
   }
   .nf-wave {
+    width: min(280px, 100%);
     height: 48px;
-    max-width: 280px;
     opacity: 0.6;
   }
   .nf-code {
