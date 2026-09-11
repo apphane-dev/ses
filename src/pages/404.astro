@@ -1,0 +1,71 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Waveform from "../components/Waveform.astro";
+---
+<Layout title="404 · page not found" description="This page does not exist on ses.apphane.dev.">
+  <main id="main" class="wrap nf">
+    <div class="nf-wave"><Waveform bars={48} /></div>
+    <p class="nf-code mono">404</p>
+    <h1 class="nf-title">This section never rendered.</h1>
+    <p class="nf-body">
+      The page you asked for does not exist here. The quickstart and the rest
+      of the site are one click away.
+    </p>
+    <a class="nf-btn" href="/">Back to the pipeline</a>
+  </main>
+</Layout>
+
+<style>
+  .nf {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 16px;
+    padding-block: 96px;
+  }
+  .nf-wave {
+    width: min(280px, 100%);
+    height: 48px;
+    opacity: 0.6;
+  }
+  .nf-code {
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.22em;
+    color: var(--brass);
+    text-transform: uppercase;
+  }
+  .nf-title {
+    font-size: 36px;
+    line-height: 40px;
+    font-weight: 700;
+  }
+  .nf-body {
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 24px;
+    max-width: 440px;
+  }
+  .nf-btn {
+    margin-top: 8px;
+    display: inline-flex;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: var(--brass);
+    color: #181818;
+    text-decoration: none;
+    transition: transform 250ms var(--ease), background 250ms var(--ease);
+  }
+  .nf-btn:hover {
+    transform: translateY(-2px);
+    background: #f2ba63;
+  }
+  .nf-btn:active {
+    transform: scale(0.98);
+  }
+</style>

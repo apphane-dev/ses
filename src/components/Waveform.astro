@@ -45,14 +45,9 @@ const items = Array.from({ length: bars }, (_, i) => {
     min-width: 2px;
     height: var(--h);
     border-radius: 2px;
-    background: linear-gradient(
-      180deg,
-      var(--brass) 0%,
-      var(--brass-dim) 70%,
-      transparent 100%
-    );
+    background: var(--brass);
     transform-origin: center;
-    animation: pulse 2.4s ease-in-out infinite;
+    animation: pulse 2.4s var(--ease) infinite;
     animation-delay: var(--d);
     opacity: 0.9;
   }

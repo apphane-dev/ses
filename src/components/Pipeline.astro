@@ -9,7 +9,7 @@ const stations = [
   {
     key: "gate",
     label: "Gate",
-    note: "Garble re-roll · dead-pause re-render",
+    note: "Garble re-roll, pause re-render",
     loop: "re-roll / re-render",
   },
   {
@@ -23,7 +23,7 @@ const stations = [
 ];
 ---
 
-<ol class="signal" aria-label="Pipeline stages">
+<ol class="signal" aria-label="Pipeline stages" data-reveal>
   {
     stations.map((s, i) => (
       <li class={`station ${s.loop ? "has-loop" : ""}`}>
@@ -80,10 +80,11 @@ const stations = [
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
-    transition: background 0.2s ease;
+    transition: background 250ms var(--ease), transform 250ms var(--ease);
   }
   .station:hover {
     background: var(--surface-2);
+    transform: translateY(-2px);
   }
   /* connective baseline — the signal running through every station */
   .station::after {
@@ -93,11 +94,7 @@ const stations = [
     right: 1.15rem;
     bottom: 0.7rem;
     height: 2px;
-    background: linear-gradient(
-      90deg,
-      var(--cyan) 0%,
-      var(--cyan) 100%
-    );
+    background: var(--cyan);
     opacity: 0.35;
   }
   .station.has-loop::after {
@@ -130,7 +127,7 @@ const stations = [
     white-space: nowrap;
   }
   .station-label {
-    font-family: var(--font-display);
+    font-family: var(--font-body);
     font-weight: 700;
     font-size: 1.15rem;
     letter-spacing: -0.01em;

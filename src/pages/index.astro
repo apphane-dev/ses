@@ -9,22 +9,22 @@ const features = [
   {
     tag: "garble gate",
     title: "Retry the bad takes",
-    body: "A sustained loud-burst detector catches likely garbling per chunk and re-rolls it within a configurable retry budget.",
+    body: "A sustained loud burst detector catches likely garbling per chunk and re-rolls it within a configurable retry budget.",
   },
   {
     tag: "pause gate",
     title: "Catch dead air",
-    body: "Over-long internal silences trigger a section-level re-render before the take is ever accepted.",
+    body: "Internal silences that run too long trigger a re-render of the whole section before the take is ever accepted.",
   },
   {
     tag: "raw / enhanced",
     title: "Enhance without losing the clean take",
-    body: "LavaSR post-processing is optional. If it injects high-frequency hash, the enhanced result is discarded and the raw take is kept.",
+    body: "LavaSR post processing is optional. If it injects high frequency hash, the enhanced result is discarded and the raw take is kept.",
   },
   {
     tag: "--slide N",
     title: "Iterate one section at a time",
-    body: "Revise a single part with --slide N instead of re-rendering the entire script. Indexes are zero-based.",
+    body: "Revise a single part with --slide N instead of re-rendering the entire script. Indexes are zero based.",
   },
 ];
 
@@ -43,14 +43,51 @@ const docs = [
   { label: "Complete narration example", meta: "examples/script.md", href: `${REPO}/blob/main/examples/script.md` },
   { label: "Voice-sample setup", meta: "examples/voices/", href: `${REPO}/blob/main/examples/voices/README.md` },
 ];
+
+const faqs = [
+  {
+    q: "Does ses need a GPU?",
+    a: "No. It runs Qwen3-TTS locally on Apple MPS or CPU. Model weights download on the first render and are reused after that.",
+  },
+  {
+    q: "Can I render offline?",
+    a: "Yes, once the model weights are cached. Later runs need no network access.",
+  },
+  {
+    q: "What kind of voice sample works best?",
+    a: "A clean clip of ten seconds or more. Pair the sample with a transcript to enable ICL cloning for the closest match.",
+  },
+  {
+    q: "One section came out wrong. Do I re-render everything?",
+    a: "No. Pass --slide N to render a single section and keep every accepted take untouched.",
+  },
+  {
+    q: "Can I swap in a different TTS engine?",
+    a: "Engines sit behind small Protocols, so you can pass your own engine to run_pipeline. The quality gates are tuned to this stack, so a different engine usually needs different thresholds.",
+  },
+  {
+    q: "Is it free for commercial work?",
+    a: "Yes. ses is MIT licensed with no usage restrictions.",
+  },
+];
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+};
+
+const taglineWords =
+  "Every section comes back editable. Every suspicious take gets caught before it ships.".split(" ");
 ---
 
 <Layout>
-  <!-- ambient signal line behind the page -->
-  <div class="grain" aria-hidden="true"></div>
-
   <header class="nav">
-    <div class="wrap nav-inner">
+    <div class="nav-pill">
       <a class="brand" href="/" aria-label="ses home">
         <span class="brand-mark" aria-hidden="true">
           <i></i><i></i><i></i><i></i><i></i>
@@ -58,7 +95,7 @@ const docs = [
         <span class="brand-name">ses</span>
         <span class="brand-sub mono">/ voice</span>
       </a>
-      <nav class="nav-links mono">
+      <nav class="nav-links mono" aria-label="Primary">
         <a href="#workflow">Pipeline</a>
         <a href="#script">Script</a>
         <a href="#start">Quickstart</a>
@@ -70,21 +107,20 @@ const docs = [
   <main id="main">
     <!-- ============ HERO ============ -->
     <section class="hero">
-      <div class="wrap hero-inner">
+      <div class="wrap hero-inner" data-reveal>
         <p class="eyebrow">Open-source voice-cloning voiceover pipeline</p>
         <h1 class="hero-title">
-          Turn a voice sample and a Markdown script into
-          <span class="accent">organized narration.</span>
+          Turn a voice sample and<br />a Markdown script into<br />organized narration.
         </h1>
         <p class="hero-body">
           <span class="mono kw">ses</span> renders a cloned voice section by
-          section, automatically retries suspicious takes, optionally enhances
-          the result, and delivers editable WAVs plus one complete render.
+          section, retries suspicious takes automatically, enhances the result
+          optionally, and hands you editable WAVs plus one complete render.
         </p>
 
         <div class="hero-cta">
-          <a class="btn btn-primary" href="#start">View the quickstart</a>
-          <a class="btn btn-ghost" href="#architecture">Explore the architecture</a>
+          <a class="btn btn-primary" href="#start">Read the quickstart</a>
+          <a class="btn btn-ghost" href="#workflow">Explore the pipeline</a>
         </div>
 
         <ul class="proof mono" aria-label="At a glance">
@@ -95,10 +131,10 @@ const docs = [
         </ul>
       </div>
 
-      <div class="hero-scope wrap" aria-hidden="true">
+      <div class="hero-scope wrap" aria-hidden="true" data-reveal>
         <div class="scope">
           <div class="scope-label mono"><span class="dot"></span> voiced signal · in → out</div>
-          <Waveform bars={120} className="hero-wave" />
+          <div class="wave-slot"><Waveform bars={120} /></div>
           <div class="scope-ticks mono">
             <span>0:00</span><span>0:20</span><span>0:45</span><span>full.wav</span>
           </div>
@@ -110,31 +146,31 @@ const docs = [
     <section class="section-pad strip-sec">
       <div class="wrap">
         <div class="strip">
-          <div class="strip-node">
+          <div class="strip-node" data-reveal>
             <span class="strip-k mono">input</span>
             <span class="strip-v">Voice sample + transcript</span>
             <span class="strip-note">ICL cloning, or audio alone</span>
           </div>
           <span class="strip-arrow mono" aria-hidden="true">→</span>
-          <div class="strip-node">
+          <div class="strip-node" data-reveal>
             <span class="strip-k mono">input</span>
             <span class="strip-v">Markdown script</span>
             <span class="strip-note">Timestamped sections</span>
           </div>
           <span class="strip-arrow mono" aria-hidden="true">→</span>
-          <div class="strip-node">
+          <div class="strip-node" data-reveal>
             <span class="strip-k mono">process</span>
-            <span class="strip-v">Quality-gated pipeline</span>
+            <span class="strip-v">Quality gated pipeline</span>
             <span class="strip-note">Your pacing &amp; thresholds</span>
           </div>
           <span class="strip-arrow mono" aria-hidden="true">→</span>
-          <div class="strip-node out">
+          <div class="strip-node out" data-reveal>
             <span class="strip-k mono">output</span>
             <span class="strip-v">Section WAVs + full.wav</span>
             <span class="strip-note">Every section is editable</span>
           </div>
         </div>
-        <p class="strip-caption">
+        <p class="strip-caption" data-reveal>
           Bring any voice sample and any script. Pair the sample with a
           transcript for ICL cloning, tune the pacing to your project, and keep
           every section as a separate deliverable.
@@ -142,17 +178,26 @@ const docs = [
       </div>
     </section>
 
+    <!-- ============ TAGLINE REVEAL ============ -->
+    <section class="section-pad tagline-sec" aria-label="Why ses">
+      <div class="wrap">
+        <p class="tagline" data-tagline>
+          {taglineWords.map((w, i) => <span data-word style={`--i:${i}`}>{w}{" "}</span>)}
+        </p>
+      </div>
+    </section>
+
     <!-- ============ FEATURES ============ -->
     <section class="section-pad" id="features">
       <div class="wrap">
-        <div class="head-block">
+        <div class="head-block" data-reveal>
           <p class="eyebrow">Built for narration work</p>
           <h2 class="h2">Not just a text-to-speech demo.</h2>
         </div>
         <div class="feature-grid">
           {
             features.map((f) => (
-              <article class="card">
+              <article class="card" data-reveal>
                 <span class="card-tag mono">{f.tag}</span>
                 <h3 class="card-title">{f.title}</h3>
                 <p class="card-body">{f.body}</p>
@@ -166,18 +211,18 @@ const docs = [
     <!-- ============ WORKFLOW ============ -->
     <section class="section-pad workflow-sec" id="workflow">
       <div class="wrap">
-        <div class="head-block">
+        <div class="head-block" data-reveal>
           <p class="eyebrow">The signal path</p>
           <h2 class="h2">From Markdown to final voiceover.</h2>
           <p class="head-sub">
             The orchestration is one line in
-            <span class="mono kw">ses/pipeline.py</span> —
+            <span class="mono kw">ses/pipeline.py</span>:
             <span class="mono">parse → chunk → synth → gate → enhance → level → concat.</span>
             Two stations can send the signal backwards.
           </p>
         </div>
         <Pipeline />
-        <div class="loop-legend mono">
+        <div class="loop-legend mono" data-reveal>
           <span><i class="lg lg-signal"></i> forward signal</span>
           <span><i class="lg lg-loop"></i> retry loop</span>
         </div>
@@ -187,19 +232,20 @@ const docs = [
     <!-- ============ SCRIPT SHOWCASE ============ -->
     <section class="section-pad" id="script">
       <div class="wrap wide">
-        <div class="head-block">
+        <div class="head-block" data-reveal>
           <p class="eyebrow">Authoring</p>
           <h2 class="h2">Write narration in plain Markdown.</h2>
           <p class="head-sub">
             Timestamped headings become named audio files. Blockquotes become
             narration. Blank quoted lines create longer paragraph pauses. Leave
             <span class="mono">TODO</span>, <span class="mono">REDO</span>, or
-            <span class="mono">WIP</span> markers in place — <span class="mono kw">ses</span> skips them.
+            <span class="mono">WIP</span> markers in place and
+            <span class="mono kw">ses</span> skips them.
           </p>
         </div>
 
         <div class="script-grid">
-          <figure class="code-pane">
+          <figure class="code-pane" data-reveal>
             <figcaption class="pane-bar mono">
               <span class="pane-dots" aria-hidden="true"><i></i><i></i><i></i></span>
               <span>script.md</span>
@@ -221,7 +267,7 @@ const docs = [
 <span class="c-mark">&gt; TODO</span> <span class="c-c">tighten the pacing note here</span></code></pre>
           </figure>
 
-          <figure class="code-pane">
+          <figure class="code-pane" data-reveal>
             <figcaption class="pane-bar mono">
               <span class="pane-tree" aria-hidden="true">▚</span>
               <span>audio/20260720-143000/</span>
@@ -240,7 +286,7 @@ const docs = [
     <!-- ============ QUICKSTART ============ -->
     <section class="section-pad start-sec" id="start">
       <div class="wrap wide start-grid">
-        <div class="start-copy">
+        <div class="start-copy" data-reveal>
           <p class="eyebrow">Your first render</p>
           <h2 class="h2">Three commands to a full run.</h2>
           <p class="head-sub">
@@ -252,14 +298,14 @@ const docs = [
 
           <div class="cmd-list">
             <p class="cmd-lead mono">Useful controls</p>
-            <div class="cmd"><code class="mono">--dry-run</code><span>Parse and print — no models, no audio.</span></div>
-            <div class="cmd"><code class="mono">--slide 2</code><span>Render a single section (zero-based).</span></div>
+            <div class="cmd"><code class="mono">--dry-run</code><span>Parse and print, no models and no audio.</span></div>
+            <div class="cmd"><code class="mono">--slide 2</code><span>Render a single section (zero based).</span></div>
             <div class="cmd"><code class="mono">--no-enhance</code><span>Render without LavaSR enhancement.</span></div>
             <div class="cmd"><code class="mono">--samples-dir</code><span>Point at any folder of voice samples.</span></div>
           </div>
         </div>
 
-        <figure class="code-pane term">
+        <figure class="code-pane term" data-reveal>
           <figcaption class="pane-bar mono">
             <span class="pane-dots" aria-hidden="true"><i></i><i></i><i></i></span>
             <span>zsh — first render</span>
@@ -283,7 +329,7 @@ const docs = [
     <!-- ============ ARCHITECTURE + COPY-OUT ============ -->
     <section class="section-pad arch-sec" id="architecture">
       <div class="wrap wide arch-grid">
-        <div class="arch-copy">
+        <div class="arch-copy" data-reveal>
           <p class="eyebrow">For developers</p>
           <h2 class="h2">Small modules. Explicit seams. No plugin magic.</h2>
           <p class="head-sub">
@@ -301,8 +347,8 @@ const docs = [
           </ul>
         </div>
 
-        <div class="copyout">
-          <p class="copyout-title">Take the pipeline — or just the useful parts.</p>
+        <div class="copyout" data-reveal>
+          <p class="copyout-title">Take the pipeline, or just the useful parts.</p>
           <p class="copyout-body">
             Need only trim, fade, normalize, garble detection, or pause
             detection? The pure audio modules copy into another project without
@@ -326,7 +372,7 @@ const docs = [
     <!-- ============ HONEST FIT ============ -->
     <section class="section-pad fit-sec">
       <div class="wrap">
-        <div class="fit-inner">
+        <div class="fit-inner" data-reveal>
           <div class="fit-head">
             <p class="eyebrow">The honest part</p>
             <h2 class="h2">A local developer tool with a deliberate engine stack.</h2>
@@ -334,7 +380,7 @@ const docs = [
           <p class="fit-body">
             <span class="mono kw">ses</span> runs Qwen3-TTS locally on Apple MPS
             or CPU and uses LavaSR for optional enhancement. The quality gates
-            are tuned to this stack — you can replace an adapter, but a different
+            are tuned to this stack. You can replace an adapter, but a different
             engine will usually need different gate thresholds. It is an
             early-stage, developer-oriented reference pipeline, not a hosted
             product.
@@ -349,11 +395,11 @@ const docs = [
     <!-- ============ DOCS ============ -->
     <section class="section-pad" id="docs">
       <div class="wrap">
-        <div class="head-block">
+        <div class="head-block" data-reveal>
           <p class="eyebrow">Read the source</p>
           <h2 class="h2">Everything is documented in the repo.</h2>
         </div>
-        <ul class="doc-list">
+        <ul class="doc-list" data-reveal>
           {
             docs.map((d, i) => (
               <li>
@@ -370,11 +416,31 @@ const docs = [
       </div>
     </section>
 
+    <!-- ============ FAQ ============ -->
+    <section class="section-pad faq-sec" id="faq">
+      <div class="wrap">
+        <div class="head-block" data-reveal>
+          <p class="eyebrow">Before you commit</p>
+          <h2 class="h2">Common questions, answered straight.</h2>
+        </div>
+        <div class="faq-grid">
+          {
+            faqs.map((f) => (
+              <div class="faq-item" data-reveal>
+                <h3 class="faq-q">{f.q}</h3>
+                <p class="faq-a">{f.a}</p>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
     <!-- ============ FINAL CTA ============ -->
     <section class="section-pad cta-sec">
-      <div class="wrap cta-inner">
-        <Waveform bars={72} className="cta-wave" />
-        <h2 class="cta-title">Give your script a voice —<br />one section at a time.</h2>
+      <div class="wrap cta-inner" data-reveal>
+        <div class="wave-slot cta-wave"><Waveform bars={72} /></div>
+        <h2 class="cta-title">Give your script a voice,<br />one section at a time.</h2>
         <p class="cta-body">
           Start with a reference clip, write the narration in Markdown, and let
           <span class="mono kw"> ses</span> render, check, enhance, and assemble the take.
@@ -393,49 +459,43 @@ const docs = [
         <span class="brand-name">ses</span>
         <span class="brand-sub mono">/ voice · Turkish</span>
       </div>
-      <p class="foot-note mono">Open source under the MIT License.</p>
+      <p class="foot-note mono">No tracking, no cookies. Open source under the <a href={`${REPO}/blob/main/LICENSE`} rel="noopener">MIT License</a>.</p>
       <a class="foot-link mono" href={REPO} rel="noopener">github.com/apphane-dev/ses ↗</a>
     </div>
   </footer>
+
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
 </Layout>
 
 <style>
-  /* ---------- ambient ---------- */
-  .grain {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    background:
-      radial-gradient(1100px 620px at 78% -8%, rgba(233, 169, 75, 0.1), transparent 60%),
-      radial-gradient(900px 560px at 6% 8%, rgba(99, 211, 199, 0.06), transparent 55%);
-  }
-  main,
-  .nav,
-  .foot {
-    position: relative;
-    z-index: 1;
-  }
-
-  /* ---------- nav ---------- */
+  /* ---------- fluid island nav ---------- */
   .nav {
-    position: sticky;
-    top: 0;
+    position: fixed;
+    top: 24px;
+    left: 0;
+    right: 0;
     z-index: 40;
-    backdrop-filter: blur(10px);
-    background: color-mix(in srgb, var(--bg) 82%, transparent);
-    border-bottom: 1px solid var(--line-soft);
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
   }
-  .nav-inner {
+  .nav-pill {
+    pointer-events: auto;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    height: 60px;
+    gap: 32px;
+    max-width: calc(100vw - 32px);
+    padding: 8px 12px 8px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
   }
   .brand {
     display: inline-flex;
     align-items: baseline;
-    gap: 0.55rem;
+    gap: 8px;
     text-decoration: none;
   }
   .brand-mark {
@@ -449,7 +509,7 @@ const docs = [
     width: 3px;
     border-radius: 2px;
     background: var(--brass);
-    animation: navpulse 1.8s ease-in-out infinite;
+    animation: navpulse 1.8s var(--ease) infinite;
   }
   .brand-mark i:nth-child(1) { height: 40%; animation-delay: 0s; }
   .brand-mark i:nth-child(2) { height: 80%; animation-delay: 0.15s; }
@@ -461,75 +521,103 @@ const docs = [
     50% { transform: scaleY(1); opacity: 1; }
   }
   .brand-name {
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 1.3rem;
+    font-weight: 700;
+    font-size: 18px;
     letter-spacing: -0.03em;
   }
   .brand-sub {
-    font-size: 0.72rem;
-    color: var(--muted-dim);
+    font-size: 12px;
+    color: var(--muted);
   }
   .nav-links {
     display: flex;
     align-items: center;
-    gap: 1.6rem;
-    font-size: 0.82rem;
+    gap: 24px;
+    font-size: 14px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-links::-webkit-scrollbar {
+    display: none;
   }
   .nav-links a {
     text-decoration: none;
     color: var(--muted);
-    transition: color 0.18s ease;
+    transition: color 200ms var(--ease), transform 200ms var(--ease);
   }
   .nav-links a:hover {
     color: var(--ink);
   }
+  .nav-links a:active {
+    transform: scale(0.98);
+  }
   .nav-cta {
     color: var(--brass) !important;
   }
-  @media (max-width: 640px) {
+  @media (max-width: 560px) {
+    .nav-pill {
+      gap: 16px;
+    }
+    .brand-sub {
+      display: none;
+    }
     .nav-links {
-      overflow-x: auto;
-      flex-wrap: nowrap;
-      gap: 1.2rem;
+      gap: 16px;
     }
   }
 
   /* ---------- hero ---------- */
   .hero {
-    padding-top: clamp(3.5rem, 7vw, 6rem);
-    padding-bottom: clamp(2rem, 4vw, 3rem);
+    padding-top: 96px;
   }
   .hero-inner {
     max-width: 900px;
   }
   .hero-title {
-    font-size: clamp(2.5rem, 6.4vw, 4.6rem);
+    font-size: 36px;
+    line-height: 1.05;
     font-weight: 700;
-    margin-top: 1.4rem;
-    max-width: 15ch;
+    margin-top: 24px;
+    max-width: 680px;
+    /* the one sanctioned gradient: text only, never a background */
+    background: linear-gradient(90deg, #ffffff 0%, #9b9b9b 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
   }
-  .hero-title .accent {
-    color: var(--brass);
+  @media (min-width: 640px) {
+    .hero-title {
+      font-size: 48px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .hero {
+      padding-top: 160px;
+    }
+    .hero-title {
+      font-size: 60px;
+    }
   }
   .hero-body {
-    margin-top: 1.5rem;
-    max-width: 56ch;
-    font-size: clamp(1.05rem, 2vw, 1.2rem);
+    margin-top: 24px;
+    max-width: 680px;
+    font-size: 18px;
+    line-height: 28px;
     color: var(--muted);
   }
   .kw {
     color: var(--ink);
     background: var(--surface-2);
-    padding: 0.06em 0.4em;
-    border-radius: 5px;
-    font-size: 0.92em;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-size: 14px;
   }
   .hero-cta {
-    margin-top: 2.2rem;
+    margin-top: 32px;
     display: flex;
     flex-wrap: wrap;
-    gap: 0.85rem;
+    gap: 12px;
   }
   .hero-cta.center {
     justify-content: center;
@@ -538,18 +626,23 @@ const docs = [
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-family: var(--font-mono);
-    font-size: 0.86rem;
-    letter-spacing: 0.01em;
-    padding: 0.85rem 1.5rem;
-    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 8px;
     text-decoration: none;
-    transition: transform 0.15s ease, background 0.18s ease, border-color 0.18s ease;
+    transition:
+      transform 250ms var(--ease),
+      background 250ms var(--ease),
+      border-color 250ms var(--ease),
+      color 250ms var(--ease);
+  }
+  .btn:active {
+    transform: scale(0.98);
   }
   .btn-primary {
     background: var(--brass);
-    color: #140f06;
-    font-weight: 600;
+    color: #181818;
     border: 1px solid var(--brass);
   }
   .btn-primary:hover {
@@ -570,17 +663,17 @@ const docs = [
     list-style: none;
     display: flex;
     flex-wrap: wrap;
-    gap: 0.6rem 1.4rem;
+    gap: 8px 24px;
     padding: 0;
-    margin: 2.4rem 0 0;
-    font-size: 0.76rem;
-    color: var(--muted-dim);
+    margin: 32px 0 0;
+    font-size: 12px;
+    color: var(--muted);
     letter-spacing: 0.05em;
   }
   .proof li {
     display: flex;
     align-items: center;
-    gap: 1.4rem;
+    gap: 24px;
   }
   .proof li:not(:last-child)::after {
     content: "·";
@@ -589,47 +682,36 @@ const docs = [
 
   /* hero scope */
   .hero-scope {
-    margin-top: clamp(2.5rem, 5vw, 4rem);
+    margin-top: 48px;
+    padding-bottom: 48px;
   }
   .scope {
     border: 1px solid var(--line);
     border-radius: var(--radius);
-    background:
-      linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
-    padding: 1.1rem 1.3rem 1.2rem;
+    background: var(--surface);
+    padding: 12px 16px;
     position: relative;
     overflow: hidden;
   }
-  .scope::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image:
-      linear-gradient(var(--line-soft) 1px, transparent 1px),
-      linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
-    background-size: 34px 34px;
-    opacity: 0.25;
-    pointer-events: none;
-  }
   .scope-label {
     position: relative;
-    font-size: 0.7rem;
+    font-size: 12px;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--muted);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.7rem;
+    gap: 8px;
+    margin-bottom: 8px;
   }
   .scope-label .dot {
-    width: 7px;
-    height: 7px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: var(--cyan);
     box-shadow: 0 0 10px var(--cyan);
   }
-  .hero-wave {
+  .wave-slot {
     position: relative;
     height: clamp(90px, 16vw, 150px);
   }
@@ -637,57 +719,67 @@ const docs = [
     position: relative;
     display: flex;
     justify-content: space-between;
-    margin-top: 0.6rem;
-    font-size: 0.68rem;
-    color: var(--muted-dim);
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--muted);
     border-top: 1px solid var(--line-soft);
-    padding-top: 0.55rem;
+    padding-top: 8px;
   }
 
   /* ---------- headings ---------- */
   .head-block {
-    max-width: 62ch;
-    margin-bottom: 2.6rem;
+    max-width: 680px;
+    margin-bottom: 32px;
   }
   .h2 {
-    font-size: clamp(1.8rem, 3.8vw, 2.7rem);
-    margin-top: 0.9rem;
+    font-size: 30px;
+    line-height: 36px;
+    margin-top: 12px;
+  }
+  @media (min-width: 768px) {
+    .h2 {
+      font-size: 36px;
+      line-height: 40px;
+    }
   }
   .head-sub {
-    margin-top: 1.1rem;
-    max-width: 68ch;
+    margin-top: 16px;
+    max-width: 680px;
     color: var(--muted);
-    font-size: 1.02rem;
+    font-size: 16px;
+    line-height: 24px;
   }
 
   /* ---------- input/output strip ---------- */
   .strip-sec {
     border-top: 1px solid var(--line-soft);
     border-bottom: 1px solid var(--line-soft);
-    background: color-mix(in srgb, var(--surface) 40%, transparent);
   }
   .strip {
     display: flex;
     align-items: stretch;
     flex-wrap: wrap;
-    gap: 0.4rem;
+    gap: 8px;
   }
   .strip-node {
     flex: 1 1 190px;
     background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 12px;
-    padding: 1.1rem 1.2rem;
+    padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 0.3rem;
+    gap: 4px;
+    transition: background 250ms var(--ease), border-color 250ms var(--ease);
+  }
+  .strip-node:hover {
+    background: var(--surface-2);
   }
   .strip-node.out {
     border-color: color-mix(in srgb, var(--brass) 45%, var(--line));
-    background: color-mix(in srgb, var(--brass) 7%, var(--surface));
   }
   .strip-k {
-    font-size: 0.64rem;
+    font-size: 12px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--cyan);
@@ -696,19 +788,20 @@ const docs = [
     color: var(--brass);
   }
   .strip-v {
-    font-family: var(--font-display);
     font-weight: 600;
-    font-size: 1.05rem;
+    font-size: 16px;
+    line-height: 24px;
   }
   .strip-note {
-    font-size: 0.8rem;
+    font-size: 14px;
+    line-height: 20px;
     color: var(--muted);
   }
   .strip-arrow {
     display: flex;
     align-items: center;
-    color: var(--muted-dim);
-    font-size: 1.1rem;
+    color: var(--dim);
+    font-size: 18px;
   }
   @media (max-width: 720px) {
     .strip-arrow {
@@ -721,10 +814,43 @@ const docs = [
     }
   }
   .strip-caption {
-    margin-top: 1.6rem;
-    max-width: 62ch;
+    margin-top: 24px;
+    max-width: 680px;
     color: var(--muted);
-    font-size: 0.95rem;
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  /* ---------- tagline reveal ---------- */
+  .tagline-sec {
+    padding-block: 80px;
+  }
+  .tagline {
+    font-size: 36px;
+    line-height: 40px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    max-width: 680px;
+    text-wrap: balance;
+  }
+  @media (min-width: 768px) {
+    .tagline {
+      font-size: 48px;
+      line-height: 1.1;
+    }
+  }
+  [data-word] {
+    color: rgba(245, 245, 245, 0.3);
+    transition: color 600ms var(--ease);
+    transition-delay: calc(var(--i) * 70ms);
+  }
+  [data-tagline].play [data-word] {
+    color: var(--ink);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-word] {
+      transition-delay: 0s;
+    }
   }
 
   /* ---------- features ---------- */
@@ -739,53 +865,60 @@ const docs = [
   }
   .card {
     background: var(--surface);
-    padding: 1.7rem 1.6rem;
+    padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 0.65rem;
-    transition: background 0.2s ease;
+    gap: 8px;
+    transition: background 250ms var(--ease);
   }
   .card:hover {
     background: var(--surface-2);
   }
+  .feature-grid .card:nth-child(2) { transition-delay: 70ms; }
+  .feature-grid .card:nth-child(3) { transition-delay: 140ms; }
+  .feature-grid .card:nth-child(4) { transition-delay: 210ms; }
   .card-tag {
     align-self: flex-start;
-    font-size: 0.66rem;
+    font-size: 12px;
+    line-height: 16px;
     letter-spacing: 0.05em;
     color: var(--brass);
     border: 1px solid color-mix(in srgb, var(--brass) 35%, transparent);
     border-radius: 999px;
-    padding: 0.18rem 0.6rem;
+    padding: 4px 12px;
   }
   .card-title {
-    font-size: 1.28rem;
-    margin-top: 0.3rem;
+    font-size: 20px;
+    line-height: 28px;
+    font-weight: 600;
+    margin-top: 4px;
   }
   .card-body {
     color: var(--muted);
-    font-size: 0.94rem;
+    font-size: 16px;
+    line-height: 24px;
   }
 
   /* ---------- workflow ---------- */
   .workflow-sec {
-    background: color-mix(in srgb, var(--surface) 35%, transparent);
     border-top: 1px solid var(--line-soft);
     border-bottom: 1px solid var(--line-soft);
   }
   .loop-legend {
     display: flex;
-    gap: 1.6rem;
-    margin-top: 1.2rem;
-    font-size: 0.72rem;
+    gap: 24px;
+    margin-top: 12px;
+    font-size: 12px;
+    line-height: 16px;
     color: var(--muted);
   }
   .loop-legend span {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 8px;
   }
   .lg {
-    width: 22px;
+    width: 24px;
     height: 3px;
     border-radius: 2px;
     display: inline-block;
@@ -802,64 +935,61 @@ const docs = [
   .code-pane {
     margin: 0;
     border: 1px solid var(--line);
-    border-radius: var(--radius);
+    border-radius: 12px;
     overflow: hidden;
-    background: #0c1417;
+    background: #000000;
   }
   .pane-bar {
     display: flex;
     align-items: center;
-    gap: 0.7rem;
-    padding: 0.6rem 1rem;
-    font-size: 0.72rem;
+    gap: 8px;
+    padding: 8px 16px;
+    font-size: 12px;
+    line-height: 16px;
     color: var(--muted);
     background: var(--surface);
     border-bottom: 1px solid var(--line);
   }
   .pane-dots {
     display: inline-flex;
-    gap: 5px;
+    gap: 4px;
   }
   .pane-dots i {
-    width: 9px;
-    height: 9px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
-    background: var(--line);
+    background: var(--raised);
   }
-  .pane-dots i:first-child { background: #3a4a3f; }
   .pane-tree { color: var(--brass); }
   .code {
     margin: 0;
-    padding: 1.15rem 1.25rem;
+    padding: 16px 24px;
     font-family: var(--font-mono);
-    font-size: 0.8rem;
+    font-size: 14px;
     line-height: 1.7;
     overflow-x: auto;
-    color: #cdd8d5;
+    color: #d4d4d4;
   }
   .code code {
     font-family: inherit;
   }
-  /* markdown script tokens */
-  .c-h { color: var(--brass); font-weight: 600; }
-  .c-q { color: #b9c6c3; }
+  .c-h { color: var(--brass); font-weight: 500; }
+  .c-q { color: #bfbfbf; }
   .c-mark { color: var(--coral); }
-  .c-c { color: var(--muted-dim); font-style: italic; }
-  /* terminal tokens */
+  .c-c { color: var(--dim); }
   .c-p { color: var(--cyan); }
   .c-flag { color: var(--brass); }
-  /* tree tokens */
-  .tree { color: #7d8f8b; }
+  .tree { color: #8f8f8f; }
   .t-dir { color: var(--cyan); }
-  .t-file { color: #cdd8d5; }
-  .t-raw { color: var(--muted-dim); }
-  .t-full { color: var(--brass); font-weight: 600; }
-  .t-meta { color: var(--muted-dim); }
+  .t-file { color: #d4d4d4; }
+  .t-raw { color: var(--dim); }
+  .t-full { color: var(--brass); font-weight: 500; }
+  .t-meta { color: var(--dim); }
 
   .script-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1.2rem;
+    gap: 24px;
     align-items: start;
   }
   @media (max-width: 860px) {
@@ -871,13 +1001,12 @@ const docs = [
   /* ---------- quickstart ---------- */
   .start-sec {
     border-top: 1px solid var(--line-soft);
-    background: color-mix(in srgb, var(--surface) 35%, transparent);
   }
   .start-grid,
   .arch-grid {
     display: grid;
     grid-template-columns: 1fr 1.1fr;
-    gap: clamp(2rem, 5vw, 4rem);
+    gap: 48px;
     align-items: center;
   }
   @media (max-width: 860px) {
@@ -887,34 +1016,37 @@ const docs = [
     }
   }
   .cmd-list {
-    margin-top: 2rem;
+    margin-top: 32px;
     display: flex;
     flex-direction: column;
-    gap: 0.55rem;
+    gap: 8px;
   }
   .cmd-lead {
-    font-size: 0.68rem;
+    font-size: 12px;
+    line-height: 16px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--muted-dim);
-    margin-bottom: 0.3rem;
+    color: var(--dim);
+    margin-bottom: 4px;
   }
   .cmd {
     display: flex;
-    gap: 0.9rem;
+    gap: 16px;
     align-items: baseline;
-    padding-bottom: 0.55rem;
+    padding-bottom: 8px;
     border-bottom: 1px solid var(--line-soft);
   }
   .cmd code {
     color: var(--brass);
-    font-size: 0.82rem;
+    font-size: 14px;
+    line-height: 20px;
     flex: 0 0 auto;
-    min-width: 8.5rem;
+    min-width: 136px;
   }
   .cmd span {
     color: var(--muted);
-    font-size: 0.9rem;
+    font-size: 14px;
+    line-height: 20px;
   }
 
   /* ---------- architecture ---------- */
@@ -922,18 +1054,19 @@ const docs = [
     border-top: 1px solid var(--line-soft);
   }
   .arch-list {
-    margin: 1.8rem 0 0;
+    margin: 24px 0 0;
     padding: 0;
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 12px;
   }
   .arch-list li {
     position: relative;
-    padding-left: 1.6rem;
+    padding-left: 24px;
     color: var(--muted);
-    font-size: 0.96rem;
+    font-size: 16px;
+    line-height: 24px;
   }
   .arch-list li::before {
     content: "▸";
@@ -945,59 +1078,62 @@ const docs = [
     background: var(--surface);
     border: 1px solid var(--line);
     border-radius: var(--radius);
-    padding: 1.7rem;
+    padding: 24px;
   }
   .copyout-title {
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: 1.35rem;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 28px;
     letter-spacing: -0.01em;
   }
   .copyout-body {
-    margin-top: 0.8rem;
+    margin-top: 8px;
     color: var(--muted);
-    font-size: 0.94rem;
+    font-size: 16px;
+    line-height: 24px;
   }
   .copyout .code-pane {
-    margin-top: 1.4rem;
+    margin-top: 16px;
   }
   .term.small .code {
-    font-size: 0.76rem;
+    font-size: 12px;
+    line-height: 16px;
   }
 
   /* ---------- fit ---------- */
   .fit-sec {
     border-top: 1px solid var(--line-soft);
     border-bottom: 1px solid var(--line-soft);
-    background: color-mix(in srgb, var(--surface) 45%, transparent);
   }
   .fit-inner {
     display: grid;
-    gap: 1.5rem;
+    gap: 24px;
   }
   .fit-head {
-    max-width: 60ch;
+    max-width: 680px;
   }
   .fit-body {
-    max-width: 66ch;
+    max-width: 680px;
     color: var(--muted);
-    font-size: 1.02rem;
+    font-size: 18px;
+    line-height: 28px;
   }
   .chips {
     list-style: none;
     padding: 0;
-    margin: 0.6rem 0 0;
+    margin: 8px 0 0;
     display: flex;
     flex-wrap: wrap;
-    gap: 0.6rem;
+    gap: 8px;
   }
   .chips li {
-    font-size: 0.76rem;
+    font-size: 12px;
+    line-height: 16px;
     color: var(--ink);
     background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 999px;
-    padding: 0.4rem 0.9rem;
+    padding: 8px 16px;
   }
 
   /* ---------- docs ---------- */
@@ -1011,31 +1147,37 @@ const docs = [
     display: grid;
     grid-template-columns: auto 1fr auto auto;
     align-items: center;
-    gap: 1.2rem;
-    padding: 1.15rem 0.4rem;
+    gap: 16px;
+    padding: 16px;
     border-bottom: 1px solid var(--line);
     text-decoration: none;
-    transition: padding 0.18s ease, background 0.18s ease;
+    transition: padding 250ms var(--ease), background 250ms var(--ease);
   }
   .doc-row:hover {
-    padding-left: 1.1rem;
+    padding-left: 24px;
     background: color-mix(in srgb, var(--brass) 6%, transparent);
   }
+  .doc-row:active {
+    transform: scale(0.995);
+  }
   .doc-idx {
-    font-size: 0.74rem;
+    font-size: 12px;
+    line-height: 16px;
     color: var(--brass);
   }
   .doc-label {
-    font-family: var(--font-display);
     font-weight: 600;
-    font-size: 1.05rem;
+    font-size: 16px;
+    line-height: 24px;
   }
   .doc-meta {
-    font-size: 0.78rem;
+    font-size: 12px;
+    line-height: 16px;
     color: var(--muted);
   }
   .doc-arrow {
-    color: var(--muted-dim);
+    color: var(--dim);
+    transition: color 250ms var(--ease);
   }
   .doc-row:hover .doc-arrow {
     color: var(--brass);
@@ -1046,12 +1188,43 @@ const docs = [
     }
   }
 
+  /* ---------- faq ---------- */
+  .faq-sec {
+    border-top: 1px solid var(--line-soft);
+  }
+  .faq-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+  @media (max-width: 768px) {
+    .faq-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .faq-item {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+  .faq-q {
+    font-size: 18px;
+    line-height: 28px;
+    font-weight: 600;
+  }
+  .faq-a {
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 24px;
+  }
+
   /* ---------- final cta ---------- */
   .cta-sec {
     text-align: center;
     border-top: 1px solid var(--line-soft);
-    background:
-      radial-gradient(700px 340px at 50% 120%, rgba(233, 169, 75, 0.14), transparent 65%);
   }
   .cta-inner {
     max-width: 720px;
@@ -1059,49 +1232,73 @@ const docs = [
   .cta-wave {
     height: 60px;
     max-width: 420px;
-    margin: 0 auto 2rem;
+    margin: 0 auto 32px;
     opacity: 0.85;
     -webkit-mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
     mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
   }
+  .cta-wave.wave-slot {
+    margin-left: auto;
+    margin-right: auto;
+  }
   .cta-title {
-    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-size: 30px;
+    line-height: 36px;
+  }
+  @media (min-width: 768px) {
+    .cta-title {
+      font-size: 48px;
+      line-height: 1.1;
+    }
   }
   .cta-body {
-    margin: 1.3rem auto 0;
-    max-width: 52ch;
+    margin: 16px auto 0;
+    max-width: 560px;
     color: var(--muted);
-    font-size: 1.08rem;
+    font-size: 18px;
+    line-height: 28px;
   }
   .cta-sec .hero-cta {
-    margin-top: 2.2rem;
+    margin-top: 32px;
+    justify-content: center;
   }
 
   /* ---------- footer ---------- */
   .foot {
     border-top: 1px solid var(--line);
-    padding-block: 2.4rem;
+    padding-block: 32px;
   }
   .foot-inner {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
+    gap: 16px;
   }
   .foot-brand {
     display: inline-flex;
     align-items: baseline;
-    gap: 0.5rem;
+    gap: 8px;
   }
   .foot-note {
-    font-size: 0.78rem;
-    color: var(--muted-dim);
+    font-size: 12px;
+    line-height: 16px;
+    color: var(--dim);
   }
-  .foot-link {
-    font-size: 0.8rem;
+  .foot-note a {
     color: var(--muted);
     text-decoration: none;
+    transition: color 200ms var(--ease);
+  }
+  .foot-note a:hover {
+    color: var(--brass);
+  }
+  .foot-link {
+    font-size: 12px;
+    line-height: 16px;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 200ms var(--ease);
   }
   .foot-link:hover {
     color: var(--brass);

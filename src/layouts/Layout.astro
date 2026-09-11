@@ -4,9 +4,13 @@ interface Props {
   description?: string;
 }
 const {
-  title = "ses — voice-cloning voiceover pipeline",
-  description = "An open-source local Python pipeline that turns a voice sample and a Markdown script into quality-checked narration — one WAV per section plus a full render.",
+  title = "ses · open source voiceover pipeline",
+  description =
+    "ses turns a voice sample and a Markdown script into quality checked narration. A local Python pipeline that renders one WAV per section plus a full render.",
 } = Astro.props;
+
+const favicon =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23181818'/%3E%3Cg fill='%23e9a94b'%3E%3Crect x='6' y='13' width='3' height='6' rx='1.5'/%3E%3Crect x='11' y='9' width='3' height='14' rx='1.5'/%3E%3Crect x='16' y='11' width='3' height='10' rx='1.5'/%3E%3Crect x='21' y='14' width='3' height='4' rx='1.5'/%3E%3C/g%3E%3C/svg%3E";
 ---
 
 <!doctype html>
@@ -19,43 +23,88 @@ const {
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    <meta name="theme-color" content="#0E1518" />
+    <meta property="og:url" content="https://ses.apphane.dev" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="theme-color" content="#181818" />
+    <link rel="icon" href={favicon} />
+    <script is:inline>document.documentElement.classList.add("js");</script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
     <slot />
+
+    <script>
+      // Scroll reveals: heavy fade up, one observer, unobserve after firing.
+      const revealables = document.querySelectorAll("[data-reveal]");
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("revealed");
+              io.unobserve(entry.target);
+            }
+          }
+        },
+        { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
+      );
+      revealables.forEach((el) => io.observe(el));
+
+      // Tagline reveal: words activate one at a time once the block is in view.
+      const tagline = document.querySelector("[data-tagline]");
+      if (tagline) {
+        const to = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) {
+                tagline.classList.add("play");
+                to.disconnect();
+              }
+            }
+          },
+          { threshold: 0.5 }
+        );
+        to.observe(tagline);
+      }
+    </script>
   </body>
 </html>
 
 <style is:global>
   :root {
-    --bg: #0e1518;
-    --surface: #121e22;
-    --surface-2: #17262b;
-    --line: #26383d;
-    --line-soft: #1e2f34;
-    --ink: #eaf0ee;
-    --muted: #8ba09d;
-    --muted-dim: #7a8f89;
+    /* Backgrounds: allowed dark set only */
+    --bg: #181818;
+    --surface: #1f1f1f;
+    --surface-2: #272727;
+    --raised: #313131;
+
+    --line: rgba(255, 255, 255, 0.1);
+    --line-soft: rgba(255, 255, 255, 0.06);
+    --ink: #f5f5f5;
+    --muted: #9b9b9b;
+    --dim: #737373;
+
+    /* Accents (text, borders, fills — never backgrounds) */
     --brass: #e9a94b;
-    --brass-dim: #c68a35;
     --cyan: #63d3c7;
     --coral: #e8705e;
 
-    --font-display: "Bricolage Grotesque", system-ui, sans-serif;
-    --font-body: "IBM Plex Sans", system-ui, sans-serif;
-    --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+    /* One typeface + mono for code and data */
+    --font-body: "Geist", system-ui, sans-serif;
+    --font-mono: "Geist Mono", ui-monospace, monospace;
+
+    /* Motion */
+    --ease: cubic-bezier(0.32, 0.72, 0, 1);
 
     --maxw: 1240px;
     --maxw-wide: 1380px;
-    --gutter: clamp(1.25rem, 5vw, 3rem);
-    --radius: 14px;
+    --gutter: 24px;
+    --radius: 16px;
   }
 
   * {
@@ -71,8 +120,8 @@ const {
     background: var(--bg);
     color: var(--ink);
     font-family: var(--font-body);
-    font-size: 17px;
-    line-height: 1.6;
+    font-size: 16px;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     overflow-x: hidden;
@@ -85,20 +134,29 @@ const {
   h1,
   h2,
   h3 {
-    font-family: var(--font-display);
+    font-family: var(--font-body);
     font-weight: 700;
-    line-height: 1.04;
     letter-spacing: -0.02em;
     margin: 0;
+    text-wrap: balance;
   }
 
   p {
     margin: 0;
+    text-wrap: pretty;
+  }
+
+  section {
+    position: relative;
+  }
+
+  section[id] {
+    scroll-margin-top: 96px;
   }
 
   ::selection {
     background: var(--brass);
-    color: #14100a;
+    color: #181818;
   }
 
   :focus-visible {
@@ -113,18 +171,16 @@ const {
     padding-inline: var(--gutter);
   }
 
-  /* wider container for code/two-column showcase sections */
   .wrap.wide {
     max-width: var(--maxw-wide);
   }
 
-  /* ---- skip link ---- */
   .skip {
     position: absolute;
-    top: -40px;
+    top: -48px;
     left: 0;
     background: var(--brass);
-    color: #14100a;
+    color: #181818;
     padding: 8px 16px;
     text-decoration: none;
     z-index: 50;
@@ -134,35 +190,59 @@ const {
     top: 0;
   }
 
-  /* ---- shared bits ---- */
+  .mono {
+    font-family: var(--font-mono);
+  }
+
   .eyebrow {
     font-family: var(--font-mono);
-    font-size: 0.72rem;
+    font-size: 12px;
     letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--brass);
     display: inline-flex;
     align-items: center;
-    gap: 0.6em;
+    gap: 8px;
   }
+
   .eyebrow::before {
     content: "";
-    width: 1.6rem;
+    width: 24px;
     height: 1px;
     background: var(--brass);
     opacity: 0.6;
   }
 
-  .mono {
-    font-family: var(--font-mono);
-  }
-
-  section {
-    position: relative;
-  }
-
   .section-pad {
-    padding-block: clamp(4rem, 9vw, 7rem);
+    padding-block: 96px;
+  }
+  @media (max-width: 900px) {
+    .section-pad {
+      padding-block: 64px;
+    }
+  }
+  @media (max-width: 560px) {
+    .section-pad {
+      padding-block: 48px;
+    }
+  }
+
+  /* Scroll reveal: translate + blur + fade over 800ms on the shared curve */
+  @media (prefers-reduced-motion: no-preference) {
+    .js [data-reveal] {
+      opacity: 0;
+      transform: translateY(64px);
+      filter: blur(12px);
+      transition:
+        opacity 800ms var(--ease),
+        transform 800ms var(--ease),
+        filter 800ms var(--ease);
+    }
+    .js [data-reveal].revealed {
+      opacity: 1;
+      transform: none;
+      filter: blur(0);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
