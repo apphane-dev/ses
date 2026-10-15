@@ -8,7 +8,7 @@ run = "astro dev ${usage_rest}"
 [tasks.build]
 description = "Build the site"
 depends = ["prepare"]
-run = "astro build"
+run = ["node scripts/verify-assets.mjs", "astro build"]
 
 [tasks.clean]
 description = "Clean build artifacts and Astro caches"

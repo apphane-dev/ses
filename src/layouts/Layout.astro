@@ -9,8 +9,6 @@ const {
     "ses turns a voice sample and a Markdown script into quality checked narration. A local Python pipeline that renders one WAV per section plus a full render.",
 } = Astro.props;
 
-const favicon =
-  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23181818'/%3E%3Cg fill='%23e9a94b'%3E%3Crect x='6' y='13' width='3' height='6' rx='1.5'/%3E%3Crect x='11' y='9' width='3' height='14' rx='1.5'/%3E%3Crect x='16' y='11' width='3' height='10' rx='1.5'/%3E%3Crect x='21' y='14' width='3' height='4' rx='1.5'/%3E%3C/g%3E%3C/svg%3E";
 ---
 
 <!doctype html>
@@ -24,16 +22,16 @@ const favicon =
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://ses.apphane.dev" />
-    <meta name="twitter:card" content="summary" />
-    <meta name="theme-color" content="#181818" />
-    <link rel="icon" href={favicon} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta property="og:image" content="https://ses.apphane.dev/brand/social.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="ses. Your script, in a cloned voice." />
+    <meta name="theme-color" content="#16100d" />
+    <link rel="icon" href="/brand/icon.svg" />
     <script is:inline>document.documentElement.classList.add("js");</script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="stylesheet" href="/brand/tokens.css" />
+    <link rel="preload" href="/brand/fonts/InstrumentSerif-Regular.ttf" as="font" type="font/ttf" crossorigin />
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
@@ -77,26 +75,21 @@ const favicon =
 
 <style is:global>
   :root {
-    /* Backgrounds: allowed dark set only */
-    --bg: #181818;
-    --surface: #1f1f1f;
-    --surface-2: #272727;
-    --raised: #313131;
-
-    --line: rgba(255, 255, 255, 0.1);
-    --line-soft: rgba(255, 255, 255, 0.06);
-    --ink: #f5f5f5;
-    --muted: #9b9b9b;
-    --dim: #737373;
-
-    /* Accents (text, borders, fills — never backgrounds) */
-    --brass: #e9a94b;
-    --cyan: #63d3c7;
-    --coral: #e8705e;
-
-    /* One typeface + mono for code and data */
-    --font-body: "Geist", system-ui, sans-serif;
-    --font-mono: "Geist Mono", ui-monospace, monospace;
+    --bg: var(--ses-background);
+    --surface: var(--ses-panel);
+    --surface-2: color-mix(in srgb, var(--ses-panel) 80%, var(--ses-line));
+    --raised: var(--ses-line);
+    --line: var(--ses-line);
+    --line-soft: color-mix(in srgb, var(--ses-line) 60%, transparent);
+    --ink: var(--ses-cream);
+    --muted: var(--ses-muted);
+    --dim: var(--ses-muted);
+    --brass: var(--ses-ember);
+    --cyan: var(--ses-cream);
+    --coral: var(--ses-ember);
+    --font-display: var(--ses-display);
+    --font-body: var(--ses-mono);
+    --font-mono: var(--ses-mono);
 
     /* Motion */
     --ease: cubic-bezier(0.32, 0.72, 0, 1);
@@ -120,8 +113,8 @@ const favicon =
     background: var(--bg);
     color: var(--ink);
     font-family: var(--font-body);
-    font-size: 16px;
-    line-height: 1.5;
+    font-size: 15px;
+    line-height: 1.65;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     overflow-x: hidden;
@@ -134,8 +127,8 @@ const favicon =
   h1,
   h2,
   h3 {
-    font-family: var(--font-body);
-    font-weight: 700;
+    font-family: var(--font-display);
+    font-weight: 400;
     letter-spacing: -0.02em;
     margin: 0;
     text-wrap: balance;
@@ -156,7 +149,7 @@ const favicon =
 
   ::selection {
     background: var(--brass);
-    color: #181818;
+    color: var(--ses-background);
   }
 
   :focus-visible {
@@ -180,7 +173,7 @@ const favicon =
     top: -48px;
     left: 0;
     background: var(--brass);
-    color: #181818;
+    color: var(--ses-background);
     padding: 8px 16px;
     text-decoration: none;
     z-index: 50;
@@ -227,21 +220,18 @@ const favicon =
     }
   }
 
-  /* Scroll reveal: translate + blur + fade over 800ms on the shared curve */
+  /* Short scroll reveals, disabled for reduced motion. */
   @media (prefers-reduced-motion: no-preference) {
     .js [data-reveal] {
       opacity: 0;
-      transform: translateY(64px);
-      filter: blur(12px);
+      transform: translateY(24px);
       transition:
-        opacity 800ms var(--ease),
-        transform 800ms var(--ease),
-        filter 800ms var(--ease);
+        opacity 500ms var(--ease),
+        transform 500ms var(--ease);
     }
     .js [data-reveal].revealed {
       opacity: 1;
       transform: none;
-      filter: blur(0);
     }
   }
 

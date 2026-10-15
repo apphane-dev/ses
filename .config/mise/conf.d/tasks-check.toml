@@ -1,6 +1,6 @@
 [tasks.check]
-description = "Astro diagnostics (not supported; astro check is not configured)"
-run = "echo 'Astro check is not supported: astro check is not configured for this project.'"
+description = "Verify the published identity and film asset hashes"
+run = "node scripts/verify-assets.mjs"
 
 [tasks.ci]
 description = "Run CI checks and build"

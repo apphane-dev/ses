@@ -8,6 +8,7 @@ node = "lts"
 dir = "{{ config_root }}"
 
 [env]
+SHARP_IGNORE_GLOBAL_LIBVIPS = "1"
 '_'.path = { path = "./node_modules/.bin" }
 
 [deps.nub]

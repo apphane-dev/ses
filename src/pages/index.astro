@@ -55,7 +55,7 @@ const faqs = [
   },
   {
     q: "What kind of voice sample works best?",
-    a: "A clean clip of ten seconds or more. Pair the sample with a transcript to enable ICL cloning for the closest match.",
+    a: "Use a clean recording of a voice you have permission to clone. Pair it with an accurate transcript to enable ICL cloning.",
   },
   {
     q: "One section came out wrong. Do I re-render everything?",
@@ -67,7 +67,7 @@ const faqs = [
   },
   {
     q: "Is it free for commercial work?",
-    a: "Yes. ses is MIT licensed with no usage restrictions.",
+    a: "The ses code is MIT licensed. Check the separate model licenses and use only voices you have permission to clone.",
   },
 ];
 
@@ -82,7 +82,7 @@ const faqSchema = {
 };
 
 const taglineWords =
-  "Every section comes back editable. Every suspicious take gets caught before it ships.".split(" ");
+  "Every section comes back editable. Quality gates flag likely garble, dead pauses, and added noise.".split(" ");
 ---
 
 <Layout>
@@ -96,6 +96,7 @@ const taglineWords =
         <span class="brand-sub mono">/ voice</span>
       </a>
       <nav class="nav-links mono" aria-label="Primary">
+        <a href="#film">Film</a>
         <a href="#workflow">Pipeline</a>
         <a href="#script">Script</a>
         <a href="#start">Quickstart</a>
@@ -110,7 +111,7 @@ const taglineWords =
       <div class="wrap hero-inner" data-reveal>
         <p class="eyebrow">Open-source voice-cloning voiceover pipeline</p>
         <h1 class="hero-title">
-          Turn a voice sample and<br />a Markdown script into<br />organized narration.
+          Your script,<br />in a cloned voice.
         </h1>
         <p class="hero-body">
           <span class="mono kw">ses</span> renders a cloned voice section by
@@ -120,7 +121,7 @@ const taglineWords =
 
         <div class="hero-cta">
           <a class="btn btn-primary" href="#start">Read the quickstart</a>
-          <a class="btn btn-ghost" href="#workflow">Explore the pipeline</a>
+          <a class="btn btn-ghost" href="#film">Watch the 32-second film</a>
         </div>
 
         <ul class="proof mono" aria-label="At a glance">
@@ -131,15 +132,24 @@ const taglineWords =
         </ul>
       </div>
 
-      <div class="hero-scope wrap" aria-hidden="true" data-reveal>
-        <div class="scope">
-          <div class="scope-label mono"><span class="dot"></span> voiced signal · in → out</div>
-          <div class="wave-slot"><Waveform bars={120} /></div>
-          <div class="scope-ticks mono">
-            <span>0:00</span><span>0:20</span><span>0:45</span><span>full.wav</span>
-          </div>
-        </div>
+    </section>
+
+    <section class="film-sec wrap" id="film" aria-labelledby="film-title">
+      <div class="film-heading">
+        <div><p class="eyebrow">A film in six sections</p><h2 id="film-title">Manuscript to air.</h2></div>
+        <p class="film-spec">00:32 / 1080p / silent</p>
       </div>
+      <figure class="film-player">
+        <video controls playsinline muted preload="none" poster="/media/ses-poster.jpg" aria-label="Manuscript to air, a silent 32-second film explaining the ses pipeline" aria-describedby="film-description">
+          <source src="/media/ses.mp4" type="video/mp4" />
+          <p>Your browser cannot play this film. <a href="/media/ses.mp4">Download the MP4</a>.</p>
+        </video>
+        <figcaption id="film-description">
+          <span>A voice sample and Markdown become section WAVs, then full.wav. Quality gates retry suspicious takes along the way. The animation is illustrative, not recorded output. <a href={`${REPO}/blob/main/marketing/film/STORYBOARD.md`}>Read the film transcript</a>.</span>
+          <a href="/media/ses.mp4" download="ses-manuscript-to-air.mp4">Download film ↓</a>
+        </figcaption>
+      </figure>
+      <div class="film-tape" aria-hidden="true"><span></span><i></i><i></i><i></i><i></i><i></i></div>
     </section>
 
     <!-- ============ INPUT → OUTPUT STRIP ============ -->
@@ -192,7 +202,7 @@ const taglineWords =
       <div class="wrap">
         <div class="head-block" data-reveal>
           <p class="eyebrow">Built for narration work</p>
-          <h2 class="h2">Not just a text-to-speech demo.</h2>
+          <h2 class="h2">Bad takes get another pass.</h2>
         </div>
         <div class="feature-grid">
           {
@@ -288,7 +298,7 @@ const taglineWords =
       <div class="wrap wide start-grid">
         <div class="start-copy" data-reveal>
           <p class="eyebrow">Your first render</p>
-          <h2 class="h2">Three commands to a full run.</h2>
+          <h2 class="h2">Your first render.</h2>
           <p class="head-sub">
             Put <span class="mono">my_voice.wav</span> in <span class="mono">in/</span>.
             Add <span class="mono">my_voice.txt</span> with the clip transcript to
@@ -486,9 +496,9 @@ const taglineWords =
     gap: 32px;
     max-width: calc(100vw - 32px);
     padding: 8px 12px 8px 16px;
-    border-radius: 999px;
+    border-radius: 4px;
     border: 1px solid var(--line);
-    background: rgba(0, 0, 0, 0.6);
+    background: color-mix(in srgb, var(--bg) 94%, transparent);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
   }
@@ -521,8 +531,9 @@ const taglineWords =
     50% { transform: scaleY(1); opacity: 1; }
   }
   .brand-name {
-    font-weight: 700;
-    font-size: 18px;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 36px;
     letter-spacing: -0.03em;
   }
   .brand-sub {
@@ -571,32 +582,29 @@ const taglineWords =
     padding-top: 96px;
   }
   .hero-inner {
-    max-width: 900px;
+    max-width: var(--maxw);
   }
   .hero-title {
-    font-size: 36px;
-    line-height: 1.05;
-    font-weight: 700;
+    font-size: 64px;
+    line-height: 0.98;
+    font-weight: 400;
     margin-top: 24px;
     max-width: 680px;
-    /* the one sanctioned gradient: text only, never a background */
-    background: linear-gradient(90deg, #ffffff 0%, #9b9b9b 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-weight: 400;
   }
   @media (min-width: 640px) {
     .hero-title {
-      font-size: 48px;
+      font-size: 88px;
     }
   }
   @media (min-width: 1024px) {
     .hero {
-      padding-top: 160px;
+      padding-top: 152px;
     }
     .hero-title {
-      font-size: 60px;
+      font-size: 112px;
     }
   }
   .hero-body {
@@ -627,7 +635,7 @@ const taglineWords =
     align-items: center;
     justify-content: center;
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 400;
     padding: 8px 12px;
     border-radius: 8px;
     text-decoration: none;
@@ -642,12 +650,12 @@ const taglineWords =
   }
   .btn-primary {
     background: var(--brass);
-    color: #181818;
+    color: var(--ses-background);
     border: 1px solid var(--brass);
   }
   .btn-primary:hover {
     transform: translateY(-2px);
-    background: #f2ba63;
+    background: var(--ses-cream);
   }
   .btn-ghost {
     background: transparent;
@@ -788,7 +796,7 @@ const taglineWords =
     color: var(--brass);
   }
   .strip-v {
-    font-weight: 600;
+    font-weight: 400;
     font-size: 16px;
     line-height: 24px;
   }
@@ -826,9 +834,11 @@ const taglineWords =
     padding-block: 80px;
   }
   .tagline {
+    font-family: var(--font-display);
+    font-weight: 400;
     font-size: 36px;
     line-height: 40px;
-    font-weight: 600;
+    font-weight: 400;
     letter-spacing: -0.02em;
     max-width: 680px;
     text-wrap: balance;
@@ -840,7 +850,7 @@ const taglineWords =
     }
   }
   [data-word] {
-    color: rgba(245, 245, 245, 0.3);
+    color: var(--muted);
     transition: color 600ms var(--ease);
     transition-delay: calc(var(--i) * 70ms);
   }
@@ -890,7 +900,7 @@ const taglineWords =
   .card-title {
     font-size: 20px;
     line-height: 28px;
-    font-weight: 600;
+    font-weight: 400;
     margin-top: 4px;
   }
   .card-body {
@@ -937,7 +947,7 @@ const taglineWords =
     border: 1px solid var(--line);
     border-radius: 12px;
     overflow: hidden;
-    background: #000000;
+    background: var(--ses-panel);
   }
   .pane-bar {
     display: flex;
@@ -968,22 +978,22 @@ const taglineWords =
     font-size: 14px;
     line-height: 1.7;
     overflow-x: auto;
-    color: #d4d4d4;
+    color: var(--ink);
   }
   .code code {
     font-family: inherit;
   }
-  .c-h { color: var(--brass); font-weight: 500; }
-  .c-q { color: #bfbfbf; }
+  .c-h { color: var(--brass); font-weight: 400; }
+  .c-q { color: var(--ink); }
   .c-mark { color: var(--coral); }
   .c-c { color: var(--dim); }
   .c-p { color: var(--cyan); }
   .c-flag { color: var(--brass); }
-  .tree { color: #8f8f8f; }
+  .tree { color: var(--muted); }
   .t-dir { color: var(--cyan); }
-  .t-file { color: #d4d4d4; }
+  .t-file { color: var(--ink); }
   .t-raw { color: var(--dim); }
-  .t-full { color: var(--brass); font-weight: 500; }
+  .t-full { color: var(--brass); font-weight: 400; }
   .t-meta { color: var(--dim); }
 
   .script-grid {
@@ -1081,7 +1091,7 @@ const taglineWords =
     padding: 24px;
   }
   .copyout-title {
-    font-weight: 600;
+    font-weight: 400;
     font-size: 20px;
     line-height: 28px;
     letter-spacing: -0.01em;
@@ -1166,7 +1176,7 @@ const taglineWords =
     color: var(--brass);
   }
   .doc-label {
-    font-weight: 600;
+    font-weight: 400;
     font-size: 16px;
     line-height: 24px;
   }
@@ -1212,7 +1222,7 @@ const taglineWords =
   .faq-q {
     font-size: 18px;
     line-height: 28px;
-    font-weight: 600;
+    font-weight: 400;
   }
   .faq-a {
     margin-top: 8px;
@@ -1302,5 +1312,46 @@ const taglineWords =
   }
   .foot-link:hover {
     color: var(--brass);
+  }
+  .hero { padding-bottom: 64px; }
+  .hero-body { font-size: 16px; max-width: 720px; }
+  .film-sec { padding-bottom: 80px; scroll-margin-top: 100px; }
+  .film-heading { display: flex; justify-content: space-between; gap: 24px; align-items: end; margin-bottom: 24px; }
+  .film-heading h2 { font-size: 52px; margin-top: 8px; }
+  .film-spec { color: var(--muted); font-size: 12px; white-space: nowrap; }
+  .film-player { margin: 0; }
+  .film-player video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+  .film-player figcaption { display: flex; justify-content: space-between; align-items: start; gap: 32px; margin-top: 16px; color: var(--muted); font-size: 12px; line-height: 1.7; }
+  .film-player figcaption span { max-width: 780px; }
+  .film-player figcaption a { color: var(--brass); white-space: nowrap; text-underline-offset: 4px; }
+  .film-tape { display: flex; justify-content: space-between; position: relative; height: 12px; border-top: 1px solid var(--line); margin-top: 32px; }
+  .film-tape span { position: absolute; left: 0; top: -2px; width: 26%; height: 3px; background: var(--brass); }
+  .film-tape i { height: 8px; border-right: 1px solid var(--line); }
+  .h2 { font-size: 44px; line-height: 1.08; }
+  .tagline { font-weight: 400; }
+  .card-title { font-size: 30px; line-height: 1.15; font-weight: 400; }
+  .card-body { font-size: 14px; line-height: 1.8; }
+  .script-grid > .code-pane:first-child { background: var(--ses-paper); color: var(--ses-ink); }
+  .script-grid > .code-pane:first-child .pane-bar { color: var(--ses-ink); border-color: color-mix(in srgb, var(--ses-ink) 15%, transparent); }
+  .script-grid > .code-pane:first-child .c-h, .script-grid > .code-pane:first-child .c-mark { color: var(--ses-heading); }
+  .script-grid > .code-pane:first-child .c-q, .script-grid > .code-pane:first-child .c-c { color: var(--ses-ink); }
+  .cta-title { font-weight: 400; font-size: 60px; }
+  .faq-q { font-weight: 400; font-size: 28px; line-height: 1.2; }
+  .faq-a { font-size: 14px; line-height: 1.8; }
+  @media (max-width: 600px) {
+    .nav-links { gap: 12px; font-size: 12px; }
+    .nav-links a[href="#script"] { display: none; }
+    .film-heading { display: block; }
+    .film-heading h2 { font-size: 40px; }
+    .film-spec { margin-top: 12px; }
+    .film-player figcaption { flex-direction: column; gap: 12px; }
+    .h2 { font-size: 38px; }
+    .hero-title { font-size: clamp(56px, 12vw, 72px); }
+    .cta-title { font-size: 44px; }
+  }
+  .script-grid > *, .start-grid > *, .arch-grid > * { min-width: 0; }
+  @media (max-width: 600px) {
+    .hero { padding-top: 136px; }
+    .nav { top: 16px; }
   }
 </style>

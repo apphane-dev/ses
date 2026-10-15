@@ -1,0 +1,20 @@
+{
+  "title": "Manuscript to air",
+  "duration_seconds": 32,
+  "audio_tracks": 0,
+  "files": {
+    "brand/banner.svg": "f1fc9d073f246a8632574a26cac475e124a23b05d4cc43d8199c3b00c80b24e0",
+    "brand/fonts/IBMPlexMono-Regular.ttf": "6a3412f058c7d8dfd9170c41e85ade48e5156ecb89356110ca57a0a27734af46",
+    "brand/fonts/InstrumentSerif-Regular.ttf": "498efd461f6ddfcb7a111bf9a565709d2085d48201d501ead960d93e84ffbb88",
+    "brand/icon.svg": "df101d6163aa3252b60d5e92ab412208e32bd42937f2623b8b32b1b1ba5b2c09",
+    "brand/licenses/IBMPlexMono-LICENSE.txt": "d741e57d5f865e294df801f96b7b5161a88b211df65887e4358d271c9fc5fb4f",
+    "brand/licenses/InstrumentSerif-LICENSE.txt": "b6b2292aa580937fb63796878d65a027a27f8c3db2d97601d0c34d9031f4ca17",
+    "brand/social.png": "100e85345b18ec62701d9572453c2cbba29fc4967b5a7bd8a8d497baeba022ae",
+    "brand/social.svg": "47e5d0a85747629ed6612fd43828daef68ca1ceeaecef3e3eb64054ff8a477a8",
+    "brand/tokens.css": "6cb5c3d7da0e1217fdf17d1b1b2d30f840eac9e19dee03fd1bce853869e112a8",
+    "brand/tokens.json": "2f700d87483d1b37dddb2c58f10d020227b0dff8245f0cd84bbcaeea9701e6bf",
+    "brand/wordmark.svg": "2b3c7423dfacb6df3c113e0896b37738cfffd6f000bbfee9dc492441a5ada4fa",
+    "media/ses.mp4": "105d06b963587b6fdc08d8350e4bcb7771523cf4183af71643320962b42c72a0",
+    "media/ses-poster.jpg": "dbb7ad94de84da095c6facbfaa9d035f219c234941c157ed638e6bb36bd02b7d"
+  }
+}
