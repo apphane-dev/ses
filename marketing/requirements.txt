@@ -1,0 +1,2 @@
+# Only for regenerating outlined SVG brand assets. Not used by ses at runtime.
+fonttools==4.67.0

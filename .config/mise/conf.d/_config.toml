@@ -15,7 +15,7 @@ run = "python -m venv .venv && python -m pip install -r requirements.txt -r requ
 
 [tasks.test]
 description = "Run the pytest suite"
-run = "pytest"
+run = "python -m pytest"
 
 [tasks.check]
 description = "Run configured repository quality checks, or report that none are supported"

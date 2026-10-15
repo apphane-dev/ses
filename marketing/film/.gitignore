@@ -1,0 +1,9 @@
+/target
+/.native/
+/deliverables/
+/frames/
+/strip.png
+/onion.png
+/out.mp4
+/_frame_snapshots/*.actual.png
+/_frame_snapshots/*.diff.png

@@ -1,0 +1,20 @@
+[tools]
+rust = "1.99.0"
+
+[tasks.build]
+description = "Build the silent ses fframes film"
+run = "cargo build --release --locked"
+
+[tasks.render]
+description = "Render and verify the silent full-HD film"
+depends = ["build"]
+run = "bash scripts/render.sh"
+
+[tasks.review]
+description = "Inspect every frame and render contact sheets"
+depends = ["build"]
+run = "bash scripts/review.sh"
+
+[tasks.test]
+description = "Test all frames, silence, and reviewed snapshots"
+run = "cargo test --release --locked"
