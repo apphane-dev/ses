@@ -35,14 +35,14 @@ const items = Array.from({ length: bars }, (_, i) => {
   .waveform {
     display: flex;
     align-items: center;
-    gap: 3px;
+    gap: clamp(1px, 0.25vw, 3px);
     height: 100%;
     width: 100%;
     min-height: 64px;
   }
   .bar {
     flex: 1 1 0;
-    min-width: 2px;
+    min-width: 1px;
     height: var(--h);
     border-radius: 2px;
     background: var(--brass);
