@@ -2,8 +2,6 @@
 
 ![ses. Your script, in a cloned voice.](brand/banner.svg)
 
-[Watch the silent product film](https://ses.apphane.dev/#film) · [Download the 32-second MP4](https://github.com/apphane-dev/ses/releases/download/film-2026-10-15/ses.mp4)
-
 **A voice-cloning voiceover pipeline for real narration work: give it a voice
 sample, a markdown script, and your settings; get back narrated audio in that
 voice — one WAV per section plus a single concatenated render.**
@@ -19,6 +17,10 @@ open-ended is the usage — any voice sample, any script, your own settings — 
 the code itself: modules are small and single-purpose, so the seams are clean if
 you want to copy one out and reshape it, up to and including swapping the engines
 (with the caveat that new engines mean retuning the gates).
+
+## See it in motion
+
+https://github.com/user-attachments/assets/6c3544dc-8800-4a78-ac6f-687cf8141416
 
 ## What it does
 
@@ -214,7 +216,7 @@ in [`docs/DESIGN.md`](docs/DESIGN.md). Contributions welcome — see
 
 The [ses identity](brand/README.md) includes the palette, self-hosted fonts,
 wordmark, waveform icon, README banner, and sharing card. The same tokens drive
-the landing page and the [silent fframes film](marketing/film/README.md).
+the landing page and the [fframes film](marketing/film/README.md).
 Marketing tools are separate from the Python pipeline.
 
 ## License
