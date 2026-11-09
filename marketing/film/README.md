@@ -62,22 +62,37 @@ Generated MP4s and review reports stay in the ignored `deliverables/` directory.
 The published video is a release asset and a static file on the `website` branch,
 not a binary in the product's main source branch.
 
+## Encode for the web
+
+```sh
+mise run encode
+```
+
+This runs `vendor/web-video/web-video.sh` on `deliverables/ses.mp4`. It writes
+`ses.av1.mp4`, the `ses.h264.mp4` fallback, and the `ses.jpg` poster, then gives
+both videos the checks above. The script is vendored unchanged, with its MIT
+license, from Evil Martians'
+[web-video skill](https://github.com/evilmartians/agent-skills/tree/b964cf1b164bd0a81019fb54fcb11a7dcec522d4/skills/web-video).
+The quality flags are pinned in `scripts/encode.sh`. ffmpeg needs SVT-AV1 and
+x264, and the AV1 pass takes a few minutes.
+
 ## Publish
 
-From the repository root, after review:
+From the repository root, after review and `mise run encode`:
 
 ```sh
 # Install fonttools from marketing/requirements.txt for asset generation.
 .venv/bin/python marketing/scripts/brand.py --check
-# Requires resvg for the social card and ffmpeg for the film poster.
+# Requires resvg for the social card and ffmpeg for verification.
 .venv/bin/python marketing/scripts/site-assets.py ../ses-website
 ```
 
-The script verifies the MP4, copies the brand assets and unchanged font licenses,
-generates the video poster, and records SHA-256 hashes in the website's
-`public/media/manifest.json`. It requires a checkout of this repo's `website`
-branch. Run that branch's `mise run build`, review the page, then commit and push
-`website`. Its existing GitHub Actions workflow deploys to Cloudflare Pages.
+The script verifies the master and the web encodes. It copies the brand assets,
+the unchanged font licenses, `ses.av1.mp4`, the H.264 encode as `ses.mp4`, and the
+poster, then records SHA-256 hashes in the website's `public/media/manifest.json`.
+It requires a checkout of this repo's `website` branch. Run that branch's
+`mise run build`, review the page, then commit and push `website`. Its existing
+GitHub Actions workflow deploys to Cloudflare Pages.
 
 The marketing release tag is `film-2026-10-15`. It is marked as not the latest
 software release. The download includes the silent MP4, poster, contact sheet,
