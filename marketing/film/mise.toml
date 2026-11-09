@@ -15,6 +15,10 @@ description = "Inspect every frame and render contact sheets"
 depends = ["build"]
 run = "bash scripts/review.sh"
 
+[tasks.encode]
+description = "Encode the rendered film as AV1 and H.264 for the web, with a poster"
+run = "bash scripts/encode.sh"
+
 [tasks.test]
 description = "Test all frames, silence, and reviewed snapshots"
 run = "cargo test --release --locked"

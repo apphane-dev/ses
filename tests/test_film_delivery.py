@@ -20,6 +20,15 @@ def test_accepts_the_silent_full_hd_delivery():
     assert VERIFY.validate_streams(probe(), {"duration_frames": 960, "duration_seconds": 32})["silent"]
 
 
+def test_accepts_the_av1_web_encode():
+    data = probe()
+    data["streams"][0].update(codec_name="av1", pix_fmt="yuv420p10le")
+    timeline = {"duration_frames": 960, "duration_seconds": 32}
+    assert VERIFY.validate_streams(data, timeline, *VERIFY.WEB["ses.av1.mp4"])["silent"]
+    with pytest.raises(ValueError, match="codec_name"):
+        VERIFY.validate_streams(data, timeline)
+
+
 def test_rejects_an_audio_track():
     data = probe()
     data["streams"].append({"codec_type": "audio"})
