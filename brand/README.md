@@ -55,8 +55,8 @@ resvg brand/social.svg brand/social.png
 ```
 
 The website lives on the separate `website` branch of this same repository.
-After rendering and reviewing the film, sync the generated assets into its
-checkout with `marketing/scripts/site-assets.py`. See the film README.
+After rendering, reviewing, and encoding the film, sync the generated assets
+into its checkout with `marketing/scripts/site-assets.py`. See the film README.
 
 ## Provenance
 

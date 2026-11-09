@@ -29,6 +29,7 @@ def main() -> None:
         raise SystemExit("Destination must be this repository's website-branch checkout.")
     run(sys.executable, str(ROOT / "marketing/scripts/brand.py"), "--check")
     run(sys.executable, str(ROOT / "marketing/film/scripts/verify.py"))
+    run(sys.executable, str(ROOT / "marketing/film/scripts/verify.py"), "--web")
     run("resvg", str(ROOT / "brand/social.svg"), str(ROOT / "brand/social.png"))
     public = website / "public"
     for source in (ROOT / "brand").rglob("*"):
@@ -38,9 +39,11 @@ def main() -> None:
             shutil.copyfile(source, target)
     media = public / "media"
     media.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(DELIVERY / "ses.mp4", media / "ses.mp4")
-    run("ffmpeg", "-hide_banner", "-loglevel", "error", "-nostdin", "-y", "-ss", "28.5", "-i", str(DELIVERY / "ses.mp4"), "-frames:v", "1", "-q:v", "2", str(media / "ses-poster.jpg"))
-    files = [*sorted((public / "brand").rglob("*")), media / "ses.mp4", media / "ses-poster.jpg"]
+    # The page plays AV1 first. ses.mp4 is the H.264 fallback and the download.
+    published = {"ses.av1.mp4": "ses.av1.mp4", "ses.h264.mp4": "ses.mp4", "ses.jpg": "ses-poster.jpg"}
+    for source, target in published.items():
+        shutil.copyfile(DELIVERY / source, media / target)
+    files = [*sorted((public / "brand").rglob("*")), *(media / target for target in published.values())]
     manifest = {"title": "Manuscript to air", "duration_seconds": 32, "audio_tracks": 0,
                 "files": {str(path.relative_to(public)): hashlib.sha256(path.read_bytes()).hexdigest() for path in files if path.is_file()}}
     (media / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
