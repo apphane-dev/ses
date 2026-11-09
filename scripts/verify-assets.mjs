@@ -6,6 +6,7 @@ const publicRoot = new URL('../public/', import.meta.url);
 const manifest = JSON.parse(readFileSync(new URL('media/manifest.json', publicRoot), 'utf8'));
 assert.equal(manifest.audio_tracks, 0, 'Marketing films must be silent');
 assert.equal(manifest.duration_seconds, 32);
+assert.ok(manifest.files['media/ses.av1.mp4']);
 assert.ok(manifest.files['media/ses.mp4']);
 assert.ok(manifest.files['brand/tokens.css']);
 for (const [path, expected] of Object.entries(manifest.files)) {

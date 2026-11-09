@@ -12,10 +12,12 @@ mise run dev
 The visual identity and the silent fframes source live on `main` in `brand/`
 and `marketing/film/`. Edit tokens there rather than maintaining a second palette.
 The website self-hosts both fonts and their licenses. It embeds the 32-second
-1080p film with native controls, a poster, and a direct download. There is no
-autoplay, third-party player, or audio stream.
+1080p film as AV1 with an H.264 fallback, with native controls, a poster, and a
+direct download of the H.264 file. There is no autoplay, third-party player, or
+audio stream.
 
-After rendering and reviewing the film in a `main` checkout, copy assets here:
+After rendering, reviewing, and encoding the film in a `main` checkout, copy
+assets here:
 
 ```sh
 # Run in the main checkout, with this checkout as the destination.

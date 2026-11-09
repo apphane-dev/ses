@@ -141,7 +141,8 @@ const taglineWords =
       </div>
       <figure class="film-player">
         <video controls playsinline muted preload="none" poster="/media/ses-poster.jpg" aria-label="Manuscript to air, a silent 32-second film explaining the ses pipeline" aria-describedby="film-description">
-          <source src="/media/ses.mp4" type="video/mp4" />
+          <source src="/media/ses.av1.mp4" type='video/mp4; codecs="av01.0.08M.10"' />
+          <source src="/media/ses.mp4" type='video/mp4; codecs="avc1.4D4033"' />
           <p>Your browser cannot play this film. <a href="/media/ses.mp4">Download the MP4</a>.</p>
         </video>
         <figcaption id="film-description">
