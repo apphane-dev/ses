@@ -6,11 +6,11 @@ ses, Turkish for "voice", turns a markdown script and a short voice sample into
 narration in that voice. Each section of the script becomes its own WAV, and the
 whole script is joined into `full.wav`. It runs
 [Qwen3-TTS](https://huggingface.co/Qwen/Qwen3-TTS-12Hz-0.6B-Base) on your machine
-and checks every take for the ways that model fails, so one command gets you
-audio you can use without re-rolling bad takes by hand.
+and retries takes that come out with a garbled loud burst or long dead air, so
+you don't have to catch those by ear and re-render them yourself.
 
-- **Local.** On a Mac it runs on the GPU through Metal (MPS), elsewhere on the
-  CPU. Once the first run has downloaded the weights, it works offline.
+- **Local.** It uses Metal (MPS) when PyTorch reports it, and the CPU
+  otherwise. Once the first run has downloaded the weights, it works offline.
 - **Self-checking.** ses regenerates garbled sentences and re-renders any section
   with more than 850 ms of dead air inside it, up to twice each. If
   [LavaSR](https://github.com/ysharma3501/LavaSR) enhancement adds
@@ -20,9 +20,10 @@ audio you can use without re-rolling bad takes by hand.
   Loudness is leveled per section after enhancement.
 - **Fix one section.** Edit a line and re-render just that section with
   `--slide N`.
-- **Common audio formats.** Samples can be WAV, FLAC, OGG, AIFF, or MP3, plus m4a,
-  AAC, and Opus through SoX. Add a transcript of the sample and ses switches to
-  in-context cloning, which follows the voice more closely.
+- **Common audio formats.** Samples can be WAV, FLAC, OGG, AIFF, or MP3. For
+  m4a, AAC, and Opus, ses falls back to SoX, which needs a build with those
+  codecs. Add a transcript of the sample and ses switches to in-context cloning,
+  which follows the voice more closely.
 - **Copyable.** The DSP, quality checks, chunking, and parsing modules need only
   numpy. Lift one into your project, or swap the TTS engine behind a two-method
   `Protocol`.
@@ -39,7 +40,8 @@ Write narration as `>` quotes under timestamped headings:
 Render it with a voice sample from `in/`:
 
 ```sh
-python -m ses --script examples/script.md --sample my_voice
+python -m ses --script examples/script.md --sample my_voice --chunk-timeout-sec 0
+# 0 disables the 180s deadline. On CPU that deadline includes model load.
 # audio/20261109-211209/
 #   slide-00-welcome.wav        # enhanced, 48 kHz
 #   slide-00-welcome.raw.wav    # the same take before enhancement
@@ -67,15 +69,19 @@ https://github.com/user-attachments/assets/6c3544dc-8800-4a78-ac6f-687cf8141416
 
 ## Getting started
 
-You need Python 3.12 and git on macOS or Linux. ses isn't a pip package, so
-run every `python -m ses` command from the repo root with the venv active.
+These steps cover macOS with Homebrew and Ubuntu 24.04. ses isn't a pip
+package, so run every `python -m ses` command from the repo root with the venv
+active.
 
-**1. Install system packages.** qwen-tts runs the `sox` command. Debian and
-Ubuntu also need `python3-venv` for the next step.
+**1. Install system packages.** ses needs Python 3.12 and git, and qwen-tts runs
+the `sox` command.
 
 ```sh
-brew install sox                        # macOS
-sudo apt install sox python3-venv       # Debian, Ubuntu
+# macOS
+brew install python@3.12 git sox
+
+# Ubuntu 24.04
+sudo apt update && sudo apt install python3.12 python3.12-venv git sox
 ```
 
 **2. Clone and install.**
@@ -117,11 +123,16 @@ python -m ses --script examples/script.md --dry-run
 **5. Render.**
 
 ```sh
-python -m ses --script examples/script.md --sample my_voice
+python -m ses --script examples/script.md --sample my_voice --chunk-timeout-sec 0
 ```
 
 > **The first render downloads the model weights** from Hugging Face. The
 > Qwen3-TTS repo is 2.5 GB and LavaSR's is 0.1 GB. Later runs use the cache.
+>
+> On CPU, keep `--chunk-timeout-sec 0`. The default 180 second deadline includes
+> the first model load. On Ubuntu 24.04 that load ran past the deadline, ses
+> tried the first sentence three times, and wrote no WAV. `0` turns the
+> deadline off.
 
 ses prints a summary with each section's length and the run folder. Play
 `full.wav` from that folder to hear the whole script.
@@ -131,10 +142,11 @@ it. Without `--script`, ses reads `script.md` from the current directory. To
 redo one section, pass its index from the dry run:
 
 ```sh
-python -m ses --sample my_voice --slide 1
+python -m ses --sample my_voice --slide 1 --chunk-timeout-sec 0
 ```
 
 `--slide` writes that one section to a new run folder and skips `full.wav`.
+On CPU, keep the same timeout flag. The default still gives up during model load.
 
 ## Options
 
@@ -147,7 +159,7 @@ python -m ses --sample my_voice --slide 1
 | `--slide N` | all | Render only section `N`, counting from 0. No `full.wav`. |
 | `--dry-run` | off | Parse and list sections. No model, no audio. |
 | `--no-enhance` | off | Skip LavaSR and keep the raw takes. |
-| `--chunk-timeout-sec N` | `180` | Retry a sentence that takes longer than this. `0` disables the timeout. |
+| `--chunk-timeout-sec N` | `180` | Seconds before retrying a sentence. The clock includes the first model load. `0` disables it. On CPU, pass `0`. |
 | `--chunk-retries N` | `2` | Retries per sentence after a failure, timeout, or garbled take. |
 | `--show-backend-warnings` | off | Show the qwen-tts and transformers warnings ses hides. |
 
