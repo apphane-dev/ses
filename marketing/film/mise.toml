@@ -1,6 +1,11 @@
 [tools]
 rust = "1.99.0"
 
+[settings]
+# The encode task does not compile. Leave install to `mise install`, or
+# `mise run encode` downloads Rust 1.99.0 before it touches ffmpeg.
+task.run_auto_install = false
+
 [tasks.build]
 description = "Build the silent ses fframes film"
 run = "cargo build --release --locked"
